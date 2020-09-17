@@ -34,6 +34,15 @@ class SocialNetwork {
   });
 }
 
+class Amenities {
+  String name;
+  bool isSelected = false;
+
+  Amenities({
+    this.name,
+  });
+}
+
 class AddPlaceScreen extends StatefulWidget {
   @override
   _AddPlaceScreenState createState() => _AddPlaceScreenState();
@@ -43,12 +52,32 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   List<OpeningHour> openingHours = [];
   List<SocialNetwork> socialNetwork = [];
+  List<Amenities> amenities = [];
 
   @override
   void initState() {
     super.initState();
+
+    // Init Arrays
     _setupOpeningHour();
     _initSocialNetwork();
+    _initAmenities();
+  }
+
+  //
+  // SETUP AMENITITES
+  //
+  _initAmenities() {
+    amenities.add(Amenities(name: 'Debit cards'));
+    amenities.add(Amenities(name: 'Free delivery'));
+    amenities.add(Amenities(name: 'Delivery'));
+    amenities.add(Amenities(name: 'Cocktails'));
+    amenities.add(Amenities(name: 'Car parking'));
+    amenities.add(Amenities(name: 'Air conditioner'));
+    amenities.add(Amenities(name: 'Non smoking'));
+    amenities.add(Amenities(name: 'Credit cards'));
+    amenities.add(Amenities(name: 'Reservations'));
+    amenities.add(Amenities(name: 'Free wifi'));
   }
 
   //
@@ -144,6 +173,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               12.0,
             ),
             children: [
+              // GENERAL
               _buildContainer(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,6 +243,48 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                     ),
                   ],
                 ),
+              ),
+
+              const SizedBox(
+                height: 12.0,
+              ),
+
+              // AMENITIES
+              _buildContainer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(text: 'AMENITIES'),
+                    SizedBox(
+                      height: 8.0,
+                    ),
+                    ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: amenities.length,
+                      itemBuilder: (lbCtx, index) {
+                        final amenity = amenities[index];
+                        return _buildAmenitiesRow(
+                          amenity: amenity,
+                          onPressed: () {
+                            setState(() {
+                              amenity.isSelected = !amenity.isSelected;
+                            });
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(
+                height: 12.0,
+              ),
+
+              // LOCATION
+              _buildContainer(
+                child: _buildLocation(),
               ),
 
               const SizedBox(
@@ -350,6 +422,14 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                     ),
                   ],
                 ),
+              ),
+
+              const SizedBox(
+                height: 12.0,
+              ),
+
+              _buildContainer(
+                child: _buildMedia(),
               ),
             ],
           ),
@@ -511,6 +591,206 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             color: Colors.grey,
           ),
           onPressed: onPressed,
+        ),
+      ],
+    );
+  }
+
+  //
+  // BUILD AMENITIES
+  //
+  Widget _buildAmenitiesRow({
+    @required Amenities amenity,
+    @required Function onPressed,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(
+              amenity.isSelected
+                  ? Icons.check_box
+                  : Icons.check_box_outline_blank,
+            ),
+            onPressed: onPressed,
+          ),
+          const SizedBox(
+            width: 8.0,
+          ),
+          Expanded(
+            child: Text(
+              amenity.name,
+              style: TextStyle(
+                fontFamily: GoloFont,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //
+  // BUILD LOCATION
+  //
+  Widget _buildLocation() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildHeader(text: 'LOCATION'),
+        const SizedBox(
+          height: 12.0,
+        ),
+        Text(
+          'Place Address *',
+          style: TextStyle(
+            fontFamily: GoloFont,
+            fontSize: 16,
+          ),
+        ),
+        Column(
+          children: [
+            _buildTextField(
+              labelText: 'Country',
+              hintText: 'Select Country',
+              shuffixIcon: Icons.keyboard_arrow_down,
+              validator: (text) {},
+              onSaved: (text) {},
+            ),
+            _buildTextField(
+              labelText: 'City',
+              hintText: 'Select City',
+              shuffixIcon: Icons.keyboard_arrow_down,
+              validator: (text) {},
+              onSaved: (text) {},
+            ),
+            _buildTextField(
+              labelText: 'Full Address',
+              hintText: 'Address',
+              validator: (text) {},
+              onSaved: (text) {},
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  //
+  // UPLOAD MEDIA
+  //
+  Widget _buildMedia() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildHeader(text: 'MEDIA'),
+        const SizedBox(
+          height: 8.0,
+        ),
+        Text(
+          'Thumb image',
+          style: TextStyle(
+            fontFamily: GoloFont,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(
+          height: 8.0,
+        ),
+        GestureDetector(
+          onTap: () {},
+          child: Container(
+            height: 120,
+            width: 120,
+            decoration: BoxDecoration(
+              color: Colors.grey[400],
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Icon(Icons.cloud_upload),
+          ),
+        ),
+        const SizedBox(
+          height: 12.0,
+        ),
+        Text(
+          'Gallery images',
+          style: TextStyle(
+            fontFamily: GoloFont,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(
+          height: 12.0,
+        ),
+        LayoutBuilder(
+          builder: (lbCtx, constraint) {
+            final oneFourth = constraint.maxWidth / 4;
+            return Container(
+              height: oneFourth,
+              child: GridView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                //physics: NeverScrollableScrollPhysics(),
+                itemCount: 5,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 1,
+                  crossAxisSpacing: 12.0,
+                  mainAxisSpacing: 12.0,
+                ),
+                itemBuilder: (ctx, index) {
+                  return Container(
+                    height: oneFourth,
+                    width: oneFourth,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4.0),
+                      child: Stack(
+                        children: [
+                          Image(
+                            image: AssetImage('assets/photos/paris.jpg'),
+                            fit: BoxFit.cover,
+                            height: oneFourth,
+                            width: oneFourth,
+                          ),
+                          Positioned(
+                            top: -8,
+                            right: -8,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                color: Colors.black,
+                              ),
+                              onPressed: () {
+                                print('Delete');
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+        const SizedBox(
+          height: 8.0,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FlatButton.icon(
+              color: Colors.grey[400],
+              onPressed: () {},
+              icon: Icon(Icons.cloud_upload),
+              label: Text(
+                'Upload Images',
+              ),
+            ),
+          ],
         ),
       ],
     );
