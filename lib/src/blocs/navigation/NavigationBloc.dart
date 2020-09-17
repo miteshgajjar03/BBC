@@ -1,0 +1,139 @@
+import 'package:flutter/material.dart';
+import 'package:getgolo/src/entity/City.dart';
+import 'package:getgolo/src/entity/Place.dart';
+import 'package:getgolo/src/views/citydetail/CityDetail.dart';
+import 'package:getgolo/src/views/myPlaces/add_place_screen.dart';
+import 'package:getgolo/src/views/place_detail/PlaceDetail.dart';
+import 'package:getgolo/src/views/profile/profile_screen.dart';
+import 'package:getgolo/src/views/review_rating/add_review_screen.dart';
+import 'package:getgolo/src/views/review_rating/review_list_screen.dart';
+
+class HomeNav {
+  BuildContext _context;
+
+  HomeNav({
+    @required BuildContext context,
+  }) {
+    this._context = context;
+  }
+
+  // ### ACTIONS
+  void openCity(City city) {
+    if (city == null) {
+      return;
+    }
+    navigateToCityDetail(city);
+  }
+
+  void navigateToCityDetail(City city) {
+    // Navigator.of(context, rootNavigator: true).pushReplacement(PageRouteBuilder(pageBuilder: (BuildContext context, _, __) => CityDetail(city: city)),);
+
+    Navigator.of(_context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: true,
+        // transitionDuration: const Duration(milliseconds: 222),
+        pageBuilder: (BuildContext context, _, __) {
+          return CityDetail(city: city);
+        },
+        // transitionsBuilder: (_, Animation<double> animation, __, Widget child) {
+        //   return SlideTransition(
+        //     child: child,
+        //     position:
+        //         animation.drive(Tween(begin: Offset(1, 0), end: Offset.zero)),
+        //   );
+        // },
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
+  /// ### Place
+  void openPlace(Place place) {
+    if (place == null) {
+      return;
+    }
+    //LoadingHub.showLoadingDialog(_context);
+    //PlaceProvider.getPlaceComments(place.id).then((comments) {
+    //LoadingHub.closeLoadingDialog();
+    // Comment list
+    //place.setComments(comments);
+    // Open place
+    _openPlace(place);
+    //});
+  }
+
+  void _openPlace(Place place) {
+    if (place == null) {
+      return;
+    }
+    // Navigator.of(context, rootNavigator: true).pushReplacement(PageRouteBuilder(pageBuilder: (BuildContext context, _, __) => PlaceDetail(place: place)));
+    Navigator.of(_context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: true,
+        // transitionDuration: const Duration(milliseconds: 222),
+        pageBuilder: (BuildContext context, _, __) {
+          return PlaceDetail(
+            place: place,
+          );
+        },
+        // transitionsBuilder: (_, Animation<double> animation, __, Widget child) {
+        //   return SlideTransition(
+        //     child: child,
+        //     position:
+        //         animation.drive(Tween(begin: Offset(1, 0), end: Offset.zero)),
+        //   );
+        // },
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
+  void openProfile() {
+    Navigator.of(_context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: true,
+        // transitionDuration: const Duration(milliseconds: 222),
+        pageBuilder: (BuildContext context, _, __) {
+          return ProfileScreen();
+        },
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
+  void openReviewList() {
+    Navigator.of(_context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (BuildContext context, _, __) {
+          return ReviewListScreen();
+        },
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
+  void openWriteReview() {
+    Navigator.of(_context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (BuildContext context, _, __) {
+          return AddReviewScreen();
+        },
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
+  void openAddPlace() {
+    Navigator.of(_context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (BuildContext context, _, __) {
+          return AddPlaceScreen();
+        },
+        fullscreenDialog: true,
+      ),
+    );
+  }
+}

@@ -1,0 +1,11 @@
+#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
+//
+//  Release.xcconfig
+//  Runner
+//
+//  Created by Mits Mistri on 07/09/20.
+//  Copyright © 2020 The Chromium Authors. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
