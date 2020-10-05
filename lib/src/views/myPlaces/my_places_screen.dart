@@ -5,6 +5,7 @@ import 'package:getgolo/modules/controls/images/MyImageHelper.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/entity/City.dart';
+import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 
 class MyPlacesScreen extends StatefulWidget {
@@ -71,8 +72,10 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
               city: widget.cities[imageIndex],
             ),
             onTap: () {
-              HomeNav(context: context).openCity(
-                widget.cities[imageIndex],
+              HomeNav(context: context).openPlace(
+                Place(
+                  {},
+                ),
               );
             },
           ),

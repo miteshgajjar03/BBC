@@ -17,7 +17,8 @@ class Localized {
 
   Future<bool> load() async {
     // Load language JSON
-    String jsonString = await rootBundle.loadString('i18n/${locale.languageCode}.json');
+    String jsonString =
+        await rootBundle.loadString('i18n/${locale.languageCode}.json');
     Map<String, dynamic> jsonMap = json.decode(jsonString);
     _localizedStrings = jsonMap.map((key, value) {
       return MapEntry(key, value.toString());
@@ -29,13 +30,12 @@ class Localized {
   String trans(String key) {
     return _localizedStrings[key];
   }
-
 }
 
 class _LocalizedDelegate extends LocalizationsDelegate<Localized> {
   const _LocalizedDelegate();
 
-  @override 
+  @override
   bool isSupported(Locale locale) {
     return ['en'].contains(locale.languageCode);
   }

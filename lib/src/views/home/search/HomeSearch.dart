@@ -129,20 +129,29 @@ class _HomeSearchPageState extends State<HomeSearchPage> {
   }
 
   Widget _buildResultTable() => new ListView.builder(
-      scrollDirection: Axis.vertical,
-      itemCount: this._searchPlaces.length,
-      itemBuilder: (BuildContext context, int index) =>
-          _buildResultCell(context, index));
+        scrollDirection: Axis.vertical,
+        itemCount: this._searchPlaces.length,
+        itemBuilder: (BuildContext context, int index) => _buildResultCell(
+          context,
+          index,
+        ),
+      );
   GestureDetector x = GestureDetector();
   Widget _buildResultCell(BuildContext context, int index) => Container(
-      child: Container(
-          margin: EdgeInsets.only(left: 25, right: 25, bottom: 15),
+        child: Container(
+          margin: EdgeInsets.only(
+            left: 25,
+            right: 25,
+            bottom: 15,
+          ),
           height: 50,
           child: SearchResultCell(
             place: this._searchPlaces[index],
             onPressedCity: _handlePressedCity,
             onPressedPlace: _handlePressedPlace,
-          )));
+          ),
+        ),
+      );
 
   // ### ACTIONS
   void dismiss() {
