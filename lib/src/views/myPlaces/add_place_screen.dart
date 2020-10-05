@@ -431,6 +431,27 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               _buildContainer(
                 child: _buildMedia(),
               ),
+
+              const SizedBox(
+                height: 12.0,
+              ),
+
+              ButtonTheme(
+                height: 50.0,
+                child: RaisedButton(
+                  textColor: Colors.white,
+                  color: GoloColors.primary,
+                  shape: StadiumBorder(),
+                  onPressed: () {},
+                  child: Text(
+                    "Submit",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -791,6 +812,25 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               ),
             ),
           ],
+        ),
+        const SizedBox(
+          height: 12.0,
+        ),
+        Text(
+          'Video',
+          style: TextStyle(
+            fontFamily: GoloFont,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(
+          width: 8.0,
+        ),
+        _buildTextField(
+          labelText: null,
+          hintText: 'Youtube, Vimeo video url',
+          validator: (text) {},
+          onSaved: (text) {},
         ),
       ],
     );
