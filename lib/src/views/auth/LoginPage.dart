@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/setting/colors.dart';
+import 'package:getgolo/src/providers/request_services/Api+auth.dart';
+import 'package:getgolo/src/providers/request_services/query/PageQuery.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 
 bool _signUpActive = false;
 bool _signInActive = true;
+bool _forgotPassActive = false;
 //Login
 TextEditingController _emailController = TextEditingController();
 TextEditingController _passwordController = TextEditingController();
@@ -18,6 +22,7 @@ TextEditingController _newConfirmPasswordController = TextEditingController();
 
 class _LogInPageState extends StateMVC<LogInPage> {
   _LogInPageState() : super(Controller());
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -87,12 +92,80 @@ class _LogInPageState extends StateMVC<LogInPage> {
           height: ScreenUtil.getInstance().setHeight(10),
         ),
         Container(
+          //child: _showForgotPassword(context),
           child: Padding(
-              padding: EdgeInsets.only(left: 30.0, right: 30.0),
-              child: _signInActive ? _showSignIn(context) : _showSignUp()),
+            padding: EdgeInsets.only(left: 30.0, right: 30.0),
+            child: _signInActive
+                ? _showSignIn(context)
+                : _forgotPassActive
+                    ? _showForgotPassword(context)
+                    : _showSignUp(),
+          ),
         ),
       ],
     ));
+  }
+
+  //--------------------
+  //Login user
+  _login(
+      {@required String email,
+      @required String password,
+      @required BuildContext buildContext}) async {
+    setState(() {
+      _isLoading = true;
+    });
+    Map<String, String> param = {"email": email, "password": password};
+    final isSuccess = await ApiAuth.loginUsing(
+      query: param,
+      context: buildContext,
+    );
+    setState(() {
+      _isLoading = false;
+    });
+    if (isSuccess) {
+      Controller.navigateToProfile(buildContext);
+    }
+  }
+
+  //---------------------
+  //Register user
+  _register(
+      {String email,
+      String pass1,
+      String pass2,
+      String name,
+      BuildContext buildContext}) async {
+    setState(() {
+      _isLoading = true;
+    });
+    Map<String, String> param = {
+      "email": email,
+      "password": pass1,
+      "name": name,
+      "c_password": pass2
+    };
+    final isSuccess = await ApiAuth.registerUsing(
+      query: param,
+      context: buildContext,
+    );
+    setState(() {
+      _isLoading = false;
+    });
+    if (isSuccess) {
+      Controller.navigateToProfile(buildContext);
+    }
+  }
+
+  //---------------------
+  //Forgot password
+  _handleForgotPasswordTap({@required BuildContext buildContext}) {}
+
+  _hideKeyboard(BuildContext context) {
+    FocusScopeNode currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+      FocusManager.instance.primaryFocus.unfocus();
+    }
   }
 
   Widget _showSignIn(context) {
@@ -149,7 +222,11 @@ class _LogInPageState extends StateMVC<LogInPage> {
           child: Padding(
             padding: EdgeInsets.only(),
             child: InkWell(
-              onTap: () {},
+              onTap: () {
+                //------- Forgot Password event-----
+                setState(() => Controller.changeToSignUp());
+                //_handleForgotPasswordTap(buildContext: context);
+              },
               child: Text(
                 'Forgot Password',
                 textAlign: TextAlign.left,
@@ -167,19 +244,29 @@ class _LogInPageState extends StateMVC<LogInPage> {
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
-            child: ButtonTheme(
-              height: 50.0,
-              child: RaisedButton(
-                textColor: Colors.white,
-                color: GoloColors.primary,
-                shape: StadiumBorder(),
-                onPressed: () {},
-                child: Text(
-                  "Sign In",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator(strokeWidth: 3))
+                : ButtonTheme(
+                    height: 50.0,
+                    child: RaisedButton(
+                      textColor: Colors.white,
+                      color: GoloColors.primary,
+                      shape: StadiumBorder(),
+                      onPressed: () {
+                        _hideKeyboard(context);
+                        _login(
+                          email: _emailController.text,
+                          password: _passwordController.text,
+                          buildContext: context,
+                        );
+                      },
+                      child: Text(
+                        "Sign In",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
           ),
         ),
         SizedBox(
@@ -328,7 +415,15 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 textColor: Colors.white,
                 color: GoloColors.primary,
                 shape: StadiumBorder(),
-                onPressed: () {},
+                onPressed: () {
+                  _hideKeyboard(context);
+                  _register(
+                      buildContext: context,
+                      email: _newEmailController.text,
+                      name: _newFullNameController.text,
+                      pass1: _newPasswordController.text,
+                      pass2: _newConfirmPasswordController.text);
+                },
                 child: Text(
                   "Sign Up",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -376,6 +471,19 @@ class _LogInPageState extends StateMVC<LogInPage> {
               ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _showForgotPassword(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          height: 30,
+          color: Colors.amber,
         ),
       ],
     );
@@ -450,9 +558,15 @@ class Controller extends ControllerMVC {
 
   static void changeToSignIn() => Model._changeToSignIn();
 
+  static void changeToForgotPassword() => Model._changeToForgotPass();
+
   static Future<bool> signInWithFacebook(context) {}
 
-  static Future<bool> signInWithEmail(context, email, password) {}
+  /*static Future<ResponseData> signInWithEmail(context, email, password) async {
+    Map<String, String> param = {"email": email, "password": password};
+    final response = await ApiAuth.loginUsing(query: param);
+    return response;
+  }*/
 
   static void signUpWithEmailAndPassword(email, password) {}
 
@@ -464,11 +578,11 @@ class Controller extends ControllerMVC {
     }
   }
 
-  static Future tryToLogInUserViaEmail(context, email, password) async {
-    if (await signInWithEmail(context, email, password) == true) {
-      navigateToProfile(context);
-    }
-  }
+  /*static Future<ResponseData> tryToLogInUserViaEmail(
+      context, email, password) async {
+    final responseData = await signInWithEmail(context, email, password);
+    return responseData;
+  }*/
 
   static Future tryToSignUpWithEmail(email, password) async {
     if (await tryToSignUpWithEmail(email, password) == true) {
@@ -495,11 +609,19 @@ class Model {
   static void _changeToSignUp() {
     _signUpActive = true;
     _signInActive = false;
+    _forgotPassActive = false;
   }
 
   static void _changeToSignIn() {
     _signUpActive = false;
     _signInActive = true;
+    _forgotPassActive = false;
+  }
+
+  static void _changeToForgotPass() {
+    _forgotPassActive = true;
+    _signUpActive = false;
+    _signInActive = false;
   }
 }
 

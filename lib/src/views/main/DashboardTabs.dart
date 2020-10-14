@@ -4,6 +4,7 @@ import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/views/all_city/Cities.dart';
 import 'package:getgolo/src/views/auth/AccountScreen.dart';
+import 'package:getgolo/src/views/auth/LoginPage.dart';
 import 'package:getgolo/src/views/home/Home.dart';
 import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 
@@ -102,7 +103,8 @@ class _DashboardTabsState extends State<DashboardTabs> {
       MyPlacesScreen(
         cities: AppState().cities,
       ),
-      AccountScreen(),
+      LogInPage(),
+      //AccountScreen(),
     ];
     return _screens;
   }
