@@ -10,6 +10,7 @@ import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/entity/PlaceAmenity.dart';
 import 'package:getgolo/src/entity/PlaceType.dart';
 import 'package:getgolo/src/entity/Post.dart';
+import 'package:getgolo/src/providers/request_services/Api+auth.dart';
 import 'package:getgolo/src/providers/request_services/Api+city.dart';
 import 'package:getgolo/src/providers/request_services/PlaceProvider.dart';
 import 'package:getgolo/src/providers/request_services/Api+post.dart';
@@ -27,7 +28,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    loadData();
+    _loadData();
   }
 
   @override
@@ -108,16 +109,20 @@ class _SplashPageState extends State<SplashPage> {
   // ### Navigation
   void openDashboard() {
     Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (BuildContext context) => DashboardTabs()));
+      MaterialPageRoute(
+        builder: (BuildContext context) => DashboardTabs(),
+      ),
+    );
   }
 
   // ### Fetch Data
-  void loadData() async {
+  void _loadData() async {
     await Future.wait([
       fetchAllCities(),
       fetchPosts(),
       fetchPopularCities(),
-      fetchCategories()
+      fetchCategories(),
+      ApiAuth.getAthToken(),
     ]).then((value) {
       openDashboard();
     });

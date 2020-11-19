@@ -5,6 +5,7 @@ import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/entity/City.dart';
+import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 import 'package:getgolo/src/views/home/controls/CityCell.dart';
 
 class Cities extends StatefulWidget {
@@ -25,24 +26,24 @@ class _CitiesState extends State<Cities> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: buildAppBar(
+        title: Localized.of(context).trans(LocalizedKey.allCities) ?? "",
+      ),
       body: Container(
-        margin: EdgeInsets.only(top: 40, left: 25, right: 25, bottom: 10),
+        margin: EdgeInsets.only(
+          top: 8,
+          left: 8,
+          right: 8,
+          bottom: 8,
+        ),
         child: Column(
           children: <Widget>[
-            Text(
-              Localized.of(context).trans(LocalizedKey.allCities) ?? "",
-              style: TextStyle(
-                  fontFamily: GoloFont,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 24,
-                  color: GoloColors.secondary1,
-                  letterSpacing: 0),
-            ),
             Flexible(
               flex: 1,
               child: Container(
-                  margin: EdgeInsets.only(bottom: 5),
-                  child: _buildCityGridView()),
+                margin: EdgeInsets.only(bottom: 5),
+                child: _buildCityGridView(),
+              ),
             )
           ],
         ),
@@ -52,10 +53,10 @@ class _CitiesState extends State<Cities> {
 
   // ### City list
   Widget _buildCityGridView() => new GridView.count(
-        padding: EdgeInsets.only(
-          top: 5,
-          bottom: 5,
-        ),
+        // padding: EdgeInsets.only(
+        //   top: 5,
+        //   bottom: 5,
+        // ),
         crossAxisCount: 2,
         childAspectRatio: 0.815, //715,
         children: List.generate(
@@ -68,7 +69,9 @@ class _CitiesState extends State<Cities> {
 
   Widget _buildCityCell(int imageIndex) => Container(
         child: Container(
-          margin: EdgeInsets.only(right: 8, bottom: 8),
+          margin: EdgeInsets.all(
+            6.0,
+          ),
           height: 200, //350,
           child: GestureDetector(
             child: CityCell(city: widget.cities[imageIndex]),

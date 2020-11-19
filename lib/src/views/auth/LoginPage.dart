@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:getgolo/modules/services/http/Api.dart';
+import 'package:getgolo/main.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
-import 'package:getgolo/src/providers/request_services/query/PageQuery.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 
 bool _signUpActive = false;
@@ -15,10 +14,11 @@ TextEditingController _emailController = TextEditingController();
 TextEditingController _passwordController = TextEditingController();
 
 //SingUp
-TextEditingController _newFullNameController = TextEditingController();
-TextEditingController _newEmailController = TextEditingController();
-TextEditingController _newPasswordController = TextEditingController();
-TextEditingController _newConfirmPasswordController = TextEditingController();
+TextEditingController _registerFullNameController = TextEditingController();
+TextEditingController _registerEmailController = TextEditingController();
+TextEditingController _registerPasswordController = TextEditingController();
+TextEditingController _registerConfirmPasswordController =
+    TextEditingController();
 
 class _LogInPageState extends StateMVC<LogInPage> {
   _LogInPageState() : super(Controller());
@@ -35,132 +35,268 @@ class _LogInPageState extends StateMVC<LogInPage> {
         ScreenUtil(width: 750, height: 1304, allowFontScaling: true)
           ..init(context);
     return SingleChildScrollView(
-        child: Column(
-      children: <Widget>[
-        SizedBox(
-          height: ScreenUtil.getInstance().setHeight(100),
-        ),
-        Container(
-          child: Padding(
-            padding: EdgeInsets.only(left: 25.0, right: 25.0),
-            child: IntrinsicWidth(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  OutlineButton(
-                    onPressed: () =>
-                        setState(() => Controller.changeToSignIn()),
-                    borderSide: new BorderSide(
-                      style: BorderStyle.none,
-                    ),
-                    child: new Text(Controller.displaySignInMenuButton,
+      child: Column(
+        children: <Widget>[
+          SizedBox(
+            height: ScreenUtil.getInstance().setHeight(100),
+          ),
+          Container(
+            child: Padding(
+              padding: EdgeInsets.only(left: 25.0, right: 25.0),
+              child: IntrinsicWidth(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    OutlineButton(
+                      onPressed: () =>
+                          setState(() => Controller.changeToSignIn()),
+                      borderSide: new BorderSide(
+                        style: BorderStyle.none,
+                      ),
+                      child: new Text(
+                        Controller.displaySignInMenuButton,
                         style: _signInActive
                             ? TextStyle(
                                 fontSize: 22,
                                 color: Colors.black,
-                                fontWeight: FontWeight.bold)
+                                fontWeight: FontWeight.bold,
+                              )
                             : TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey,
-                                fontWeight: FontWeight.normal)),
-                  ),
-                  OutlineButton(
-                    onPressed: () =>
-                        setState(() => Controller.changeToSignUp()),
-                    borderSide: BorderSide(
-                      style: BorderStyle.none,
+                                fontWeight: FontWeight.normal,
+                              ),
+                      ),
                     ),
-                    child: Text(Controller.displaySignUpMenuButton,
+                    OutlineButton(
+                      onPressed: () => setState(
+                        () => Controller.changeToSignUp(),
+                      ),
+                      borderSide: BorderSide(
+                        style: BorderStyle.none,
+                      ),
+                      child: Text(
+                        Controller.displaySignUpMenuButton,
                         style: _signUpActive
                             ? TextStyle(
                                 fontSize: 22,
                                 color: Colors.black,
-                                fontWeight: FontWeight.bold)
+                                fontWeight: FontWeight.bold,
+                              )
                             : TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey,
-                                fontWeight: FontWeight.normal)),
-                  )
-                ],
+                                fontWeight: FontWeight.normal,
+                              ),
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
+            height: ScreenUtil.getInstance().setHeight(170),
           ),
-          height: ScreenUtil.getInstance().setHeight(170),
-        ),
-        SizedBox(
-          height: ScreenUtil.getInstance().setHeight(10),
-        ),
-        Container(
-          //child: _showForgotPassword(context),
-          child: Padding(
-            padding: EdgeInsets.only(left: 30.0, right: 30.0),
-            child: _signInActive
-                ? _showSignIn(context)
-                : _forgotPassActive
-                    ? _showForgotPassword(context)
-                    : _showSignUp(),
+          SizedBox(
+            height: ScreenUtil.getInstance().setHeight(10),
           ),
-        ),
-      ],
-    ));
+          Container(
+            child: Padding(
+              padding: EdgeInsets.only(left: 30.0, right: 30.0),
+              child: _signInActive
+                  ? _showSignIn(context)
+                  : _forgotPassActive
+                      ? _showForgotPassword(context)
+                      : _showSignUp(),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  //--------------------
-  //Login user
-  _login(
-      {@required String email,
-      @required String password,
-      @required BuildContext buildContext}) async {
-    setState(() {
-      _isLoading = true;
-    });
-    Map<String, String> param = {"email": email, "password": password};
-    final isSuccess = await ApiAuth.loginUsing(
-      query: param,
-      context: buildContext,
+  //
+  // Snackbar
+  //
+  _showSnackBar(
+    String message,
+    BuildContext buildContext,
+  ) {
+    Scaffold.of(buildContext).hideCurrentSnackBar();
+    Scaffold.of(buildContext).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
     );
-    setState(() {
-      _isLoading = false;
-    });
-    if (isSuccess) {
-      Controller.navigateToProfile(buildContext);
+  }
+
+  //
+  // Validate Login Input
+  //
+  _validateLoginInput(
+    BuildContext buildContext,
+  ) {
+    if (_emailController.text.isEmpty) {
+      _showSnackBar(
+        'Please enter email id',
+        buildContext,
+      );
+    } else if (!_isValidEmail(_emailController.text)) {
+      _showSnackBar(
+        'Please enter valid email id',
+        buildContext,
+      );
+    } else if (_passwordController.text.isEmpty) {
+      _showSnackBar(
+        'Please enter your password',
+        buildContext,
+      );
+    } else {
+      _login(
+        email: _emailController.text,
+        password: _passwordController.text,
+        buildContext: context,
+      );
     }
   }
 
-  //---------------------
-  //Register user
-  _register(
-      {String email,
-      String pass1,
-      String pass2,
-      String name,
-      BuildContext buildContext}) async {
+  //
+  // Login user
+  //
+  _login({
+    @required String email,
+    @required String password,
+    @required BuildContext buildContext,
+  }) async {
     setState(() {
       _isLoading = true;
     });
     Map<String, String> param = {
       "email": email,
-      "password": pass1,
-      "name": name,
-      "c_password": pass2
+      "password": password,
     };
-    final isSuccess = await ApiAuth.registerUsing(
+    final response = await ApiAuth.loginUsing(
       query: param,
-      context: buildContext,
     );
     setState(() {
       _isLoading = false;
     });
-    if (isSuccess) {
-      Controller.navigateToProfile(buildContext);
+    if (response.isSuccess) {
+      final BottomNavigationBar bottomBar = globalKey.currentWidget;
+      bottomBar.onTap(3);
+    } else {
+      Scaffold.of(context).hideCurrentSnackBar();
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${response.message}',
+          ),
+        ),
+      );
     }
   }
 
-  //---------------------
-  //Forgot password
-  _handleForgotPasswordTap({@required BuildContext buildContext}) {}
+  //
+  // Validate Register Input
+  //
+  _validateRegisterInput(
+    BuildContext buildContext,
+  ) {
+    if (_registerFullNameController.text.isEmpty) {
+      _showSnackBar(
+        'Please enter your full name',
+        buildContext,
+      );
+    } else if (_registerEmailController.text.isEmpty) {
+      _showSnackBar(
+        'Please enter email id',
+        buildContext,
+      );
+    } else if (!_isValidEmail(_registerEmailController.text)) {
+      _showSnackBar(
+        'Please enter valid email id',
+        buildContext,
+      );
+    } else if (_registerPasswordController.text.isEmpty) {
+      _showSnackBar(
+        'Please enter your password',
+        buildContext,
+      );
+    } else if (_registerPasswordController.text.length < 8) {
+      _showSnackBar(
+        'Password must be 8 characters long!',
+        buildContext,
+      );
+    } else if (_registerConfirmPasswordController.text.isEmpty) {
+      _showSnackBar(
+        'Please enter your confirm password',
+        buildContext,
+      );
+    } else if (_registerPasswordController.text !=
+        _registerConfirmPasswordController.text) {
+      _showSnackBar(
+        'Password and confirm does not matched!',
+        buildContext,
+      );
+    } else {
+      _register(
+        buildContext: context,
+        email: _registerEmailController.text,
+        name: _registerFullNameController.text,
+        pass1: _registerPasswordController.text,
+        pass2: _registerConfirmPasswordController.text,
+      );
+    }
+  }
 
+  bool _isValidEmail(String em) {
+    String p =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regExp = new RegExp(p);
+    return regExp.hasMatch(em);
+  }
+
+  //
+  // Register user
+  //
+  _register({
+    String email,
+    String pass1,
+    String pass2,
+    String name,
+    BuildContext buildContext,
+  }) async {
+    setState(() {
+      _isLoading = true;
+    });
+    Map<String, String> param = {
+      "name": name,
+      "email": email,
+      "password": pass1,
+      "c_password": pass2
+    };
+    final response = await ApiAuth.registerUsing(
+      query: param,
+    );
+    setState(() {
+      _isLoading = false;
+    });
+    if (response.isSuccess) {
+    } else {
+      Scaffold.of(context).hideCurrentSnackBar();
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${response.message}',
+          ),
+        ),
+      );
+    }
+  }
+
+  //
+  // Hide Keyboard
+  //
   _hideKeyboard(BuildContext context) {
     FocusScopeNode currentFocus = FocusScope.of(context);
     if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
@@ -194,7 +330,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
         SizedBox(
-          height: ScreenUtil.getInstance().setHeight(50),
+          height: ScreenUtil.getInstance().setHeight(20),
         ),
         Container(
           child: Padding(
@@ -208,15 +344,23 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 hintText: Controller.displayHintTextPassword,
                 hintStyle: CustomTextStyle.formField(context),
                 enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 1.0)),
+                  borderSide: BorderSide(
+                    color: Colors.black,
+                    width: 1.0,
+                  ),
+                ),
                 focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 1.0)),
+                  borderSide: BorderSide(
+                    color: Colors.black,
+                    width: 1.0,
+                  ),
+                ),
               ),
             ),
           ),
         ),
         SizedBox(
-          height: ScreenUtil.getInstance().setHeight(20),
+          height: ScreenUtil.getInstance().setHeight(30),
         ),
         Container(
           child: Padding(
@@ -224,16 +368,17 @@ class _LogInPageState extends StateMVC<LogInPage> {
             child: InkWell(
               onTap: () {
                 //------- Forgot Password event-----
-                setState(() => Controller.changeToSignUp());
+                setState(() => Controller.changeToForgotPassword());
                 //_handleForgotPasswordTap(buildContext: context);
               },
               child: Text(
                 'Forgot Password',
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.normal,
-                    color: GoloColors.primary),
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  color: GoloColors.primary,
+                ),
               ),
             ),
           ),
@@ -254,11 +399,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                       shape: StadiumBorder(),
                       onPressed: () {
                         _hideKeyboard(context);
-                        _login(
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                          buildContext: context,
-                        );
+                        _validateLoginInput(context);
                       },
                       child: Text(
                         "Sign In",
@@ -272,7 +413,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
         SizedBox(
           height: ScreenUtil.getInstance().setHeight(30),
         ),
-        Container(
+        /*Container(
           child: Padding(
             padding: EdgeInsets.only(),
             child: ButtonTheme(
@@ -282,9 +423,13 @@ class _LogInPageState extends StateMVC<LogInPage> {
                 color: Color(0xFF3C5A99),
                 shape: StadiumBorder(),
                 onPressed: () {},
-                child: Text(Controller.displaySignInFacebookButton,
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text(
+                  Controller.displaySignInFacebookButton,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ),
@@ -308,7 +453,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
               ),
             ),
           ),
-        ),
+        ),*/
       ],
     );
   }
@@ -325,7 +470,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
             padding: EdgeInsets.only(),
             child: TextField(
               style: TextStyle(color: Colors.black),
-              controller: _newFullNameController,
+              controller: _registerFullNameController,
               decoration: InputDecoration(
                 hintText: "Full Name",
                 hintStyle: CustomTextStyle.formField(context),
@@ -339,14 +484,14 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
         SizedBox(
-          height: ScreenUtil.getInstance().setHeight(50),
+          height: ScreenUtil.getInstance().setHeight(20),
         ),
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
             child: TextField(
               style: TextStyle(color: Colors.black),
-              controller: _newEmailController,
+              controller: _registerEmailController,
               decoration: InputDecoration(
                 hintText: Controller.displayHintTextEmail,
                 hintStyle: CustomTextStyle.formField(context),
@@ -360,7 +505,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
         SizedBox(
-          height: ScreenUtil.getInstance().setHeight(50),
+          height: ScreenUtil.getInstance().setHeight(20),
         ),
         Container(
           child: Padding(
@@ -368,7 +513,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
             child: TextField(
               obscureText: true,
               style: TextStyle(color: Colors.black),
-              controller: _newPasswordController,
+              controller: _registerPasswordController,
               decoration: InputDecoration(
                 //Add th Hint text here.
                 hintText: Controller.displayHintTextPassword,
@@ -390,7 +535,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
             child: TextField(
               obscureText: true,
               style: TextStyle(color: Colors.black),
-              controller: _newConfirmPasswordController,
+              controller: _registerConfirmPasswordController,
               decoration: InputDecoration(
                 //Add th Hint text here.
                 hintText: "Confirm Password",
@@ -404,38 +549,36 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
         SizedBox(
-          height: ScreenUtil.getInstance().setHeight(20),
+          height: ScreenUtil.getInstance().setHeight(40),
         ),
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
-            child: ButtonTheme(
-              height: 50.0,
-              child: RaisedButton(
-                textColor: Colors.white,
-                color: GoloColors.primary,
-                shape: StadiumBorder(),
-                onPressed: () {
-                  _hideKeyboard(context);
-                  _register(
-                      buildContext: context,
-                      email: _newEmailController.text,
-                      name: _newFullNameController.text,
-                      pass1: _newPasswordController.text,
-                      pass2: _newConfirmPasswordController.text);
-                },
-                child: Text(
-                  "Sign Up",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator(strokeWidth: 3))
+                : ButtonTheme(
+                    height: 50.0,
+                    child: RaisedButton(
+                      textColor: Colors.white,
+                      color: GoloColors.primary,
+                      shape: StadiumBorder(),
+                      onPressed: () {
+                        _hideKeyboard(context);
+                        _validateRegisterInput(context);
+                      },
+                      child: Text(
+                        "Sign Up",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
           ),
         ),
         SizedBox(
-          height: ScreenUtil.getInstance().setHeight(30),
+          height: ScreenUtil.getInstance().setHeight(20),
         ),
-        Container(
+        /*Container(
           child: Padding(
             padding: EdgeInsets.only(),
             child: ButtonTheme(
@@ -453,7 +596,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
         SizedBox(
-          height: ScreenUtil.getInstance().setHeight(30),
+          height: ScreenUtil.getInstance().setHeight(20),
         ),
         Container(
           child: Padding(
@@ -471,7 +614,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
               ),
             ),
           ),
-        ),
+        ),*/
       ],
     );
   }
@@ -497,8 +640,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
           color: Colors.white.withOpacity(0.6),
         ),
       );
-
-  Widget emailErrorText() => Text(Controller.displayErrorEmailLogIn);
 }
 
 class LogInPage extends StatefulWidget {
@@ -524,10 +665,6 @@ class Controller extends ControllerMVC {
   static Controller get con => _this;
 
   /// The Controller doesn't know any values or methods. It simply handles the communication between the view and the model.
-
-  static String get displayLogoTitle => Model._logoTitle;
-
-  static String get displayLogoSubTitle => Model._logoSubTitle;
 
   static String get displaySignUpMenuButton => Model._signUpMenuButton;
 
@@ -560,23 +697,11 @@ class Controller extends ControllerMVC {
 
   static void changeToForgotPassword() => Model._changeToForgotPass();
 
-  static Future<bool> signInWithFacebook(context) {}
-
   /*static Future<ResponseData> signInWithEmail(context, email, password) async {
     Map<String, String> param = {"email": email, "password": password};
     final response = await ApiAuth.loginUsing(query: param);
     return response;
   }*/
-
-  static void signUpWithEmailAndPassword(email, password) {}
-
-  static Future navigateToProfile(context) {}
-
-  static Future tryToLogInUserViaFacebook(context) async {
-    if (await signInWithFacebook(context) == true) {
-      navigateToProfile(context);
-    }
-  }
 
   /*static Future<ResponseData> tryToLogInUserViaEmail(
       context, email, password) async {
@@ -591,8 +716,6 @@ class Controller extends ControllerMVC {
 }
 
 class Model {
-  static String _logoTitle = "MOMENTUM";
-  static String _logoSubTitle = "GROWTH * HAPPENS * TODAY";
   static String _signInMenuButton = "SIGN IN";
   static String _signUpMenuButton = "SIGN UP";
   static String _hintTextEmail = "Email";
@@ -624,20 +747,6 @@ class Model {
     _signInActive = false;
   }
 }
-
-// ThemeData _buildDarkTheme() {
-//   final baseTheme = ThemeData(
-//     fontFamily: "Open Sans",
-//   );
-//   return baseTheme.copyWith(
-//     brightness: Brightness.dark,
-//     primaryColor: Color(0xFF143642),
-//     primaryColorLight: Color(0xFF26667d),
-//     primaryColorDark: Color(0xFF08161b),
-//     primaryColorBrightness: Brightness.dark,
-//     accentColor: Colors.white,
-//   );
-// }
 
 class CustomTextStyle {
   static TextStyle formField(BuildContext context) {

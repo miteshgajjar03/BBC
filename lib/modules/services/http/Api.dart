@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'dart:core';
 import 'dart:async';
+import 'package:getgolo/src/entity/User.dart';
 import 'package:getgolo/src/providers/request_services/query/PageQuery.dart';
 import 'package:http/http.dart';
 
 class ResponseData {
   dynamic json;
   String error;
-  ResponseData(this.json, this.error);
+  ResponseData(
+    this.json,
+    this.error,
+  );
 }
 
 enum RequestType { Get, Post }
@@ -31,6 +35,17 @@ class Api {
         RequestType.Get, _makeUrl(api, query != null ? query.toQuery() : null));
   }
 
+  //
+  // GET HEADER
+  //
+  static Map<String, String> _getHeader() {
+    Map<String, String> headerDict = {};
+    if (UserManager.shared.authToken.isNotEmpty) {
+      headerDict['Authorization'] = UserManager.shared.authToken;
+    }
+    return headerDict;
+  }
+
   // REQUEST
   static Future<ResponseData> _request(RequestType type, String url,
       {Map<String, dynamic> body}) async {
@@ -38,15 +53,23 @@ class Api {
     Response response;
     switch (type) {
       case RequestType.Get:
-        response = await get(url);
+        response = await get(
+          url,
+          headers: _getHeader(),
+        );
         break;
       case RequestType.Post:
-        response = await post(url, body: body);
+        response = await post(
+          url,
+          body: body,
+          headers: _getHeader(),
+        );
         break;
     }
     // sample info available in response
     print(
-        "RESPONSE:--> \n URL:-- ${url} \n parameters:-- ${body} \n Body:-- ${response.body}\n StatusCode:-- ${response.statusCode}");
+      "RESPONSE:--> \n URL:-- $url \n parameters:-- $body \n Body:-- ${response.body}\n StatusCode:-- ${response.statusCode}",
+    );
     int statusCode = response.statusCode;
     if (statusCode == 200) {
       return ResponseData(response.body, null);
@@ -56,7 +79,7 @@ class Api {
         var res = json.decode(response.body);
         msg = (res["message"] as String) ?? "ERROR";
       } else {
-        print('NOT MAP');
+        print('Error while parsing data');
       }
       return ResponseData(null, msg);
     }

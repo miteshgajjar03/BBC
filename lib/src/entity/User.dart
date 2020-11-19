@@ -1,4 +1,3 @@
-
 import 'package:getgolo/modules/services/platform/lara/lara.dart';
 import 'package:getgolo/src/entity/Base.dart';
 
@@ -12,7 +11,7 @@ class User extends Base {
   int isAdmin;
   int status;
 
-  User(Map<String, dynamic> json) : super(json){
+  User(Map<String, dynamic> json) : super(json) {
     name = json["name"];
     email = json["email"];
     avatarUrl = Lara.baseUrlImage + json["avatar"];
@@ -24,5 +23,18 @@ class User extends Base {
   }
   factory User.fromJson(Map<String, dynamic> json) {
     return User(json);
+  }
+}
+
+class UserManager {
+  static final UserManager shared = UserManager._internal();
+  String authToken = '';
+
+  factory UserManager() {
+    return shared;
+  }
+
+  UserManager._internal() {
+    // Init properties here
   }
 }

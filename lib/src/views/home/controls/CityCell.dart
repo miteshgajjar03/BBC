@@ -24,70 +24,77 @@ class _CityCellState extends State<CityCell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-      child: Stack(
-        children: <Widget>[
-          MyImage.from(
-            widget.city.featuredImage,
-            borderRadius: new BorderRadius.all(Radius.circular(15)),
-          ),
-          Container(
-            height: 350.0,
-            decoration: BoxDecoration(
+      body: Container(
+        child: Stack(
+          children: <Widget>[
+            MyImage.from(
+              widget.city.featuredImage,
               borderRadius: new BorderRadius.all(Radius.circular(15)),
-              color: Colors.white,
-              gradient: LinearGradient(
-                begin: FractionalOffset.topCenter,
-                end: FractionalOffset.bottomCenter,
-                colors: [Colors.transparent, Colors.black.withAlpha(200)],
-                stops: [0.4, 1.0],
+            ),
+            Container(
+              height: 350.0,
+              decoration: BoxDecoration(
+                borderRadius: new BorderRadius.all(Radius.circular(15)),
+                color: Colors.white,
+                gradient: LinearGradient(
+                  begin: FractionalOffset.topCenter,
+                  end: FractionalOffset.bottomCenter,
+                  colors: [Colors.transparent, Colors.black.withAlpha(200)],
+                  stops: [0.4, 1.0],
+                ),
               ),
             ),
-          ),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.only(left: 15, top: 20),
-                  child: Text(
-                    widget.city != null ? (widget.city.country ?? "") : "",
-                    style: TextStyle(
-                      fontFamily: GoloFont,
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
+            Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(left: 15, top: 20),
+                    child: Text(
+                      widget.city != null ? (widget.city.country ?? "") : "",
+                      style: TextStyle(
+                        fontFamily: GoloFont,
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: 15, bottom: 15),
-                  child: Column(
+                  Container(
+                    margin: EdgeInsets.only(left: 15, bottom: 15),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                        Text(widget.city.name ?? "",
-                            style: TextStyle(
-                                fontFamily: GoloFont,
-                                fontSize: 24,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500)),
                         Text(
-                            widget.city != null
-                                ? "${widget.city.count ?? 0} places"
-                                : "0 places",
-                            style: TextStyle(
-                                fontFamily: GoloFont,
-                                fontSize: 16,
-                                color: Colors.white))
-                      ]),
-                )
-              ],
-            ),
-          )
-        ],
+                          widget.city.name ?? "",
+                          style: TextStyle(
+                            fontFamily: GoloFont,
+                            fontSize: 24,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          widget.city != null
+                              ? "${widget.city.count ?? 0} places"
+                              : "0 places",
+                          style: TextStyle(
+                            fontFamily: GoloFont,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

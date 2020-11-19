@@ -1,7 +1,9 @@
 import 'package:den_lineicons/den_lineicons.dart';
 import 'package:flutter/material.dart';
+import 'package:getgolo/main.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/state/AppState.dart';
+import 'package:getgolo/src/entity/User.dart';
 import 'package:getgolo/src/views/all_city/Cities.dart';
 import 'package:getgolo/src/views/auth/AccountScreen.dart';
 import 'package:getgolo/src/views/auth/LoginPage.dart';
@@ -32,6 +34,7 @@ class _DashboardTabsState extends State<DashboardTabs> {
         children: _buildScreens(),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        key: globalKey,
         showSelectedLabels: false,
         showUnselectedLabels: false,
         elevation: 0,
@@ -92,19 +95,19 @@ class _DashboardTabsState extends State<DashboardTabs> {
   List<StatefulWidget> _buildScreens() {
     _screens = <StatefulWidget>[
       Home(
-          cities: AppState().popularCities,
-          categories: AppState().categories,
-          homeOpenAllCities: () {
-            openTab(1);
-          }),
+        cities: AppState().popularCities,
+        categories: AppState().categories,
+        homeOpenAllCities: () {
+          openTab(1);
+        },
+      ),
       Cities(
         cities: AppState().cities,
       ),
       MyPlacesScreen(
         cities: AppState().cities,
       ),
-      LogInPage(),
-      //AccountScreen(),
+      UserManager.shared.authToken.isEmpty ? LogInPage() : AccountScreen(),
     ];
     return _screens;
   }

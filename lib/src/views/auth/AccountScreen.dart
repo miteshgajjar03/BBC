@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
+import 'package:getgolo/src/providers/request_services/Api+auth.dart';
+
+import '../../../main.dart';
 
 class AccountScreen extends StatefulWidget {
   //@override
@@ -51,9 +54,10 @@ class AccountScreen extends StatefulWidget {
                 'WishList',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black),
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                ),
               ),
             ),
           ),
@@ -68,9 +72,10 @@ class AccountScreen extends StatefulWidget {
                 'Logout',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black),
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                ),
               ),
             ),
           ),
@@ -206,12 +211,20 @@ class AccountScreenState extends State<AccountScreen> {
                                   textColor: Colors.white,
                                   color: GoloColors.primary,
                                   shape: StadiumBorder(),
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    final response = await ApiAuth.logout();
+                                    if (response.isSuccess) {
+                                      final BottomNavigationBar bottomBar =
+                                          globalKey.currentWidget;
+                                      bottomBar.onTap(3);
+                                    }
+                                  },
                                   child: Text(
                                     "Logout",
                                     style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),

@@ -1,4 +1,3 @@
-import 'package:den_lineicons/den_lineicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:getgolo/localization/Localized.dart';
