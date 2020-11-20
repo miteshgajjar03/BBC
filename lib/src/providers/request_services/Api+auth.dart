@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:getgolo/modules/services/platform/Platform.dart';
@@ -59,7 +60,7 @@ class ApiAuth {
     } else {
       return AuthResponseHandler(
         isSuccess: true,
-        message: '',
+        message: 'Signed up Successfully! Please Login to your account!',
       );
     }
   }
@@ -71,7 +72,7 @@ class ApiAuth {
     var url = Platform().shared.baseUrl + "app/users/logout";
     final response = await Api.requestGet(url);
 
-    if (json.decode(response.json) is Map<String, dynamic>) {
+    try {
       final res = json.decode(response.json) as Map<String, dynamic>;
       if (res['responseCode'] is int) {
         final responseCode = res['responseCode'] as int;
@@ -87,10 +88,56 @@ class ApiAuth {
         isSuccess: false,
         message: res['message'] as String,
       );
-    } else {
+    } catch (error) {
       return AuthResponseHandler(
         isSuccess: false,
-        message: 'Error while parsing data',
+        message: error.toString(),
+      );
+    }
+  }
+
+  //
+  // GetUserProfile
+  //
+  static Future<User> getProfile() async {
+    final api = Platform().shared.baseUrl + "app/users";
+    final response = await Api.requestGet(api);
+    try {
+      final userDict = json.decode(response.json) as Map<String, dynamic>;
+      final user = User.fromJson(userDict['data']);
+      return user;
+    } catch (error) {
+      print('ERROR WHILE GET USER DATA :: ${error.toString()}');
+      return null;
+    }
+  }
+
+  //
+  // Update User Pofile
+  //
+  static Future<AuthResponseHandler> updateProfile({
+    @required Map<String, dynamic> dict,
+    @required File imageFile,
+    @required String imageFieldName,
+  }) async {
+    final api = Platform().shared.baseUrl + "app/users/updateProfile";
+    final response = await Api.requestPostUploadImage(
+      api,
+      imageFile,
+      imageFieldName,
+      dict,
+    );
+
+    try {
+      final res = json.decode(response.json) as Map<String, dynamic>;
+      return AuthResponseHandler(
+        isSuccess: true,
+        message: res['message'] ?? 'Profile updated Successfully!',
+      );
+    } catch (error) {
+      return AuthResponseHandler(
+        isSuccess: true,
+        message: error.toString(),
       );
     }
   }

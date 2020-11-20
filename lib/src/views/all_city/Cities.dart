@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:getgolo/localization/Localized.dart';
 import 'package:getgolo/localization/LocalizedKey.dart';
-import 'package:getgolo/modules/setting/colors.dart';
-import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';

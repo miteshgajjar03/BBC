@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/main.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
+import 'package:getgolo/src/views/auth/ForgotPassword.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 
 bool _signUpActive = false;
@@ -23,6 +25,21 @@ TextEditingController _registerConfirmPasswordController =
 class _LogInPageState extends StateMVC<LogInPage> {
   _LogInPageState() : super(Controller());
   bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _resetTextEditingControllerValue();
+    super.dispose();
+  }
+
+  _resetTextEditingControllerValue() {
+    _emailController.text = '';
+    _passwordController.text = '';
+    _registerFullNameController.text = '';
+    _registerEmailController.text = '';
+    _registerPasswordController.text = '';
+    _registerConfirmPasswordController.text = '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +66,10 @@ class _LogInPageState extends StateMVC<LogInPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     OutlineButton(
-                      onPressed: () =>
-                          setState(() => Controller.changeToSignIn()),
+                      onPressed: () => setState(() {
+                        _resetTextEditingControllerValue();
+                        Controller.changeToSignIn();
+                      }),
                       borderSide: new BorderSide(
                         style: BorderStyle.none,
                       ),
@@ -71,7 +90,10 @@ class _LogInPageState extends StateMVC<LogInPage> {
                     ),
                     OutlineButton(
                       onPressed: () => setState(
-                        () => Controller.changeToSignUp(),
+                        () {
+                          _resetTextEditingControllerValue();
+                          Controller.changeToSignUp();
+                        },
                       ),
                       borderSide: BorderSide(
                         style: BorderStyle.none,
@@ -141,7 +163,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
         'Please enter email id',
         buildContext,
       );
-    } else if (!_isValidEmail(_emailController.text)) {
+    } else if (!isValidEmail(_emailController.text)) {
       _showSnackBar(
         'Please enter valid email id',
         buildContext,
@@ -212,7 +234,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
         'Please enter email id',
         buildContext,
       );
-    } else if (!_isValidEmail(_registerEmailController.text)) {
+    } else if (!isValidEmail(_registerEmailController.text)) {
       _showSnackBar(
         'Please enter valid email id',
         buildContext,
@@ -249,13 +271,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
     }
   }
 
-  bool _isValidEmail(String em) {
-    String p =
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regExp = new RegExp(p);
-    return regExp.hasMatch(em);
-  }
-
   //
   // Register user
   //
@@ -282,6 +297,14 @@ class _LogInPageState extends StateMVC<LogInPage> {
       _isLoading = false;
     });
     if (response.isSuccess) {
+      _showSnackBar(response.message, context);
+      Future.delayed(Duration(seconds: 2)).then(
+        (value) => {
+          setState(() {
+            Controller.changeToSignIn();
+          })
+        },
+      );
     } else {
       Scaffold.of(context).hideCurrentSnackBar();
       Scaffold.of(context).showSnackBar(
@@ -291,16 +314,6 @@ class _LogInPageState extends StateMVC<LogInPage> {
           ),
         ),
       );
-    }
-  }
-
-  //
-  // Hide Keyboard
-  //
-  _hideKeyboard(BuildContext context) {
-    FocusScopeNode currentFocus = FocusScope.of(context);
-    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
-      FocusManager.instance.primaryFocus.unfocus();
     }
   }
 
@@ -317,6 +330,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
             child: TextField(
               style: TextStyle(color: Colors.black),
               controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 hintText: Controller.displayHintTextEmail,
                 hintStyle: CustomTextStyle.formField(context),
@@ -367,9 +381,13 @@ class _LogInPageState extends StateMVC<LogInPage> {
             padding: EdgeInsets.only(),
             child: InkWell(
               onTap: () {
-                //------- Forgot Password event-----
-                setState(() => Controller.changeToForgotPassword());
-                //_handleForgotPasswordTap(buildContext: context);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (ctx) {
+                      return ForgotPassword();
+                    },
+                  ),
+                );
               },
               child: Text(
                 'Forgot Password',
@@ -398,7 +416,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                       color: GoloColors.primary,
                       shape: StadiumBorder(),
                       onPressed: () {
-                        _hideKeyboard(context);
+                        hideKeyboard(context);
                         _validateLoginInput(context);
                       },
                       child: Text(
@@ -492,6 +510,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
             child: TextField(
               style: TextStyle(color: Colors.black),
               controller: _registerEmailController,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 hintText: Controller.displayHintTextEmail,
                 hintStyle: CustomTextStyle.formField(context),
@@ -563,7 +582,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
                       color: GoloColors.primary,
                       shape: StadiumBorder(),
                       onPressed: () {
-                        _hideKeyboard(context);
+                        hideKeyboard(context);
                         _validateRegisterInput(context);
                       },
                       child: Text(

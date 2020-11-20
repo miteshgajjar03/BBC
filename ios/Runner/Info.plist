@@ -41,5 +41,9 @@
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow application to access your photo library to select photo.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow camera to capture photo.</string>
 </dict>
 </plist>

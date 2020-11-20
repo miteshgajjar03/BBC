@@ -12,14 +12,15 @@ class User extends Base {
   int status;
 
   User(Map<String, dynamic> json) : super(json) {
-    name = json["name"];
-    email = json["email"];
-    avatarUrl = Lara.baseUrlImage + json["avatar"];
-    phoneNumber = json["phone_number"];
-    facebook = json["facebook"];
-    instagram = json["instagram"];
-    isAdmin = json["is_admin"];
-    status = json["status"];
+    name = json["name"] ?? '';
+    email = json["email"] ?? '';
+    final url = json["avatar"] ?? '';
+    avatarUrl = Lara.baseUrlImage + url;
+    phoneNumber = json["phone_number"] ?? '';
+    facebook = json["facebook"] ?? '';
+    instagram = json["instagram"] ?? '';
+    isAdmin = json["is_admin"] ?? 0;
+    status = json["status"] ?? 0;
   }
   factory User.fromJson(Map<String, dynamic> json) {
     return User(json);

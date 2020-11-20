@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 import '../../../main.dart';
 
@@ -37,9 +39,10 @@ class AccountScreen extends StatefulWidget {
                 'My Place',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black),
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                ),
               ),
             ),
           ),
@@ -94,6 +97,39 @@ class AccountScreen extends StatefulWidget {
 }
 
 class AccountScreenState extends State<AccountScreen> {
+  _logout() async {
+    showConfirmationAlert(
+      context: context,
+      actionButtonTitle: 'Yes',
+      cancelButtonTitle: 'No',
+      cancelAction: () {},
+      confirmAction: () async {
+        final progress = ProgressDialog(
+          context,
+          isDismissible: false,
+          type: ProgressDialogType.Normal,
+        );
+        await progress.show();
+        final _ = await ApiAuth.logout();
+        await progress.hide();
+        //if (response.isSuccess) {
+        Future.delayed(
+          Duration(
+            milliseconds: 100,
+          ),
+        ).then(
+          (value) {
+            final BottomNavigationBar bottomBar = globalKey.currentWidget;
+            bottomBar.onTap(3);
+          },
+        );
+
+        //}
+      },
+      message: 'Are you sure you want to logout?',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -211,13 +247,8 @@ class AccountScreenState extends State<AccountScreen> {
                                   textColor: Colors.white,
                                   color: GoloColors.primary,
                                   shape: StadiumBorder(),
-                                  onPressed: () async {
-                                    final response = await ApiAuth.logout();
-                                    if (response.isSuccess) {
-                                      final BottomNavigationBar bottomBar =
-                                          globalKey.currentWidget;
-                                      bottomBar.onTap(3);
-                                    }
+                                  onPressed: () {
+                                    _logout();
                                   },
                                   child: Text(
                                     "Logout",

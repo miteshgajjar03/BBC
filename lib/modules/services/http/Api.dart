@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 import 'dart:async';
+import 'dart:io';
 import 'package:getgolo/src/entity/User.dart';
 import 'package:getgolo/src/providers/request_services/query/PageQuery.dart';
 import 'package:http/http.dart';
@@ -33,6 +34,15 @@ class Api {
       String api, PageQuery query) async {
     return await _request(
         RequestType.Get, _makeUrl(api, query != null ? query.toQuery() : null));
+  }
+
+  static Future<ResponseData> requestPostUploadImage(
+    String api,
+    File imageFile,
+    String imageFieldName,
+    Map<String, dynamic> query,
+  ) {
+    return _uploadImage(_makeUrl(api, query), imageFile, imageFieldName);
   }
 
   //
@@ -86,7 +96,42 @@ class Api {
     return ResponseData(null, "Error while parsing data");
   }
 
-  static String _makeUrl(String api, Map<String, String> query) {
+  static Future<ResponseData> _uploadImage(
+    String url,
+    File imageFile,
+    String imageFieldName,
+  ) async {
+    var postUri = Uri.parse(url);
+    MultipartRequest request = MultipartRequest("POST", postUri);
+    request.headers.addAll(_getHeader());
+    MultipartFile multipartFile = await MultipartFile.fromPath(
+      imageFieldName,
+      imageFile.path,
+      filename: 'profile_image.png',
+    );
+
+    request.files.add(multipartFile);
+    StreamedResponse response = await request.send();
+    final responseData = await response.stream.toBytes();
+    final responseString = String.fromCharCodes(responseData);
+
+    int statusCode = response.statusCode;
+    if (statusCode == 200) {
+      return ResponseData(responseString, null);
+    } else if (statusCode == 401) {
+      var msg = "ERROR";
+      if (response.reasonPhrase is String) {
+        var res = json.decode(responseString);
+        msg = (res["message"] as String) ?? "ERROR";
+      } else {
+        print('Error while parsing data');
+      }
+      return ResponseData(null, msg);
+    }
+    return ResponseData(null, "Error while parsing data");
+  }
+
+  static String _makeUrl(String api, Map<String, dynamic> query) {
     var params = [];
     if (query != null) {
       query.forEach((key, value) {
