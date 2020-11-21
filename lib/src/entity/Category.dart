@@ -15,6 +15,7 @@ class Category extends Base {
   String seoDescription;
   String createdAt;
   String updatedAt;
+  bool isSelected = false;
 
   Category(Map<String, dynamic> json) : super(json) {
     name = json["name"];

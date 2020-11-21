@@ -10,7 +10,7 @@ import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/entity/User.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:getgolo/modules/services/platform/Platform.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -87,7 +87,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _phoneController.text = objUser.phoneNumber;
     _facebookController.text = objUser.facebook;
     _instaController.text = objUser.instagram;
-    print('USER IMAGE :: ${objUser.avatarUrl}');
   }
 
   //
@@ -99,6 +98,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _pickedImage = File(image.path);
       });
+    }
+  }
+
+  //
+  // ChangePassword
+  //
+  _validateChangePassword({
+    @required BuildContext ctx,
+  }) async {
+    hideKeyboard(ctx);
+    if (_currentPassController.text.isEmpty) {
+      showSnackBar(
+        'Please enter your old password!',
+        ctx,
+      );
+    } else if (_newPassController.text.length < 8) {
+      showSnackBar(
+        'New password should be 8 characters long!',
+        ctx,
+      );
+    } else if (_confirmPassController.text.length < 8) {
+      showSnackBar(
+        'Confirm password should be 8 characters long!',
+        ctx,
+      );
+    } else if (_newPassController.text != _confirmPassController.text) {
+      showSnackBar(
+        'New password and confirm password does not matched!',
+        ctx,
+      );
+    } else {
+      final progress = ProgressDialog(ctx);
+      await progress.show();
+      final response = await ApiAuth.changePassword(
+        dict: {
+          'old_password': _currentPassController.text,
+          'new_password': _newPassController.text,
+        },
+      );
+      await progress.hide();
+      showSnackBar(response.message, ctx);
+      if (response.isSuccess) {
+        _currentPassController.text = '';
+        _newPassController.text = '';
+        _confirmPassController.text = '';
+      }
     }
   }
 
@@ -259,7 +304,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(
                   height: 22,
                 ),
-                _buildActionButton(title: 'Save', onPressed: () {}),
+                _buildActionButton(
+                    title: 'Save',
+                    onPressed: () {
+                      _validateChangePassword(ctx: fbContext);
+                    }),
                 SizedBox(
                   height: 22,
                 ),

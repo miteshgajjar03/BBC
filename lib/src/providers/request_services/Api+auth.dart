@@ -143,6 +143,29 @@ class ApiAuth {
   }
 
   //
+  // Change Password
+  //
+  static Future<AuthResponseHandler> changePassword({
+    @required Map<String, dynamic> dict,
+  }) async {
+    final api = Platform().shared.baseUrl + "app/users/updatePassword";
+    final response = await Api.requestPost(api, null, dict);
+    try {
+      final res = json.decode(response.json) as Map<String, dynamic>;
+      var isSuccess = res['responseCode'] as int == 200;
+      return AuthResponseHandler(
+        isSuccess: isSuccess,
+        message: res['message'] as String ?? '',
+      );
+    } catch (error) {
+      return AuthResponseHandler(
+        isSuccess: false,
+        message: error.toString(),
+      );
+    }
+  }
+
+  //
   // Store User Data
   //
   static Future<bool> _storeTokenInPreference({@required String token}) async {

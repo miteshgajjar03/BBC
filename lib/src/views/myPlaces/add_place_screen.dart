@@ -4,7 +4,12 @@ import 'package:getgolo/localization/Localized.dart';
 import 'package:getgolo/localization/LocalizedKey.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
+import 'package:getgolo/modules/state/AppState.dart';
+import 'package:getgolo/src/entity/Amenity.dart';
+import 'package:getgolo/src/entity/Category.dart';
+import 'package:getgolo/src/entity/PlaceInitialData.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
+import 'package:getgolo/src/views/myPlaces/selection_screen.dart';
 
 class OpeningHour {
   String title;
@@ -34,15 +39,6 @@ class SocialNetwork {
   });
 }
 
-class Amenities {
-  String name;
-  bool isSelected = false;
-
-  Amenities({
-    this.name,
-  });
-}
-
 class AddPlaceScreen extends StatefulWidget {
   @override
   _AddPlaceScreenState createState() => _AddPlaceScreenState();
@@ -52,7 +48,18 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   List<OpeningHour> openingHours = [];
   List<SocialNetwork> socialNetwork = [];
-  List<Amenities> amenities = [];
+  PlaceInitialData objInitialData = PlaceInitialData();
+  Future<bool> _future;
+
+  // Text Editing Controllers
+  TextEditingController _categoryController = TextEditingController();
+
+  TextEditingController _countryController = TextEditingController();
+  TextEditingController _cityController = TextEditingController();
+
+  Country _selectedCountry;
+  City _selectedCity;
+  List<Category> _selectedCategory = [];
 
   @override
   void initState() {
@@ -61,23 +68,13 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     // Init Arrays
     _setupOpeningHour();
     _initSocialNetwork();
-    _initAmenities();
+
+    _future = getDefaultDataFromAPI();
   }
 
-  //
-  // SETUP AMENITITES
-  //
-  _initAmenities() {
-    amenities.add(Amenities(name: 'Debit cards'));
-    amenities.add(Amenities(name: 'Free delivery'));
-    amenities.add(Amenities(name: 'Delivery'));
-    amenities.add(Amenities(name: 'Cocktails'));
-    amenities.add(Amenities(name: 'Car parking'));
-    amenities.add(Amenities(name: 'Air conditioner'));
-    amenities.add(Amenities(name: 'Non smoking'));
-    amenities.add(Amenities(name: 'Credit cards'));
-    amenities.add(Amenities(name: 'Reservations'));
-    amenities.add(Amenities(name: 'Free wifi'));
+  Future<bool> getDefaultDataFromAPI() async {
+    await objInitialData.getInitialAPIData();
+    return true;
   }
 
   //
@@ -165,295 +162,345 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       ),
       backgroundColor: Colors.grey[200],
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.all(
-              12.0,
-            ),
-            children: [
-              // GENERAL
-              _buildContainer(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(text: 'GENERAL'),
-                    const SizedBox(
-                      height: 8.0,
-                    ),
-                    // Place Name
-                    _buildTextField(
-                      labelText: 'Place Name (en)*',
-                      hintText: 'Enter your business name',
-                      validator: (text) {},
-                      onSaved: (text) {},
-                    ),
-                    // Price Range
-                    _buildTextField(
-                      labelText: 'Price Range',
-                      hintText: 'Enter your price range',
-                      validator: (text) {},
-                      onSaved: (text) {},
-                    ),
-                    const SizedBox(
-                      height: 12,
-                    ),
-                    // Description
-                    Text(
-                      'Description (en)*',
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        fontFamily: GoloFont,
-                      ),
-                    ),
-                    Container(
-                      height: 120,
-                      margin: const EdgeInsets.only(top: 12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4.0),
-                        border: Border.all(
-                          width: 0.5,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      child: TextField(
-                        keyboardType: TextInputType.multiline,
-                        cursorColor: Colors.black,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                    // Select Category
-                    _buildTextField(
-                      labelText: 'Category *',
-                      hintText: 'Select Category',
-                      validator: (text) {},
-                      onSaved: (text) {},
-                    ),
-                    // Place Type
-                    _buildTextField(
-                      labelText: 'Place Type *',
-                      hintText: 'Select Place Type in Your Category',
-                      validator: (text) {},
-                      onSaved: (text) {},
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(
-                height: 12.0,
-              ),
-
-              // AMENITIES
-              _buildContainer(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(text: 'AMENITIES'),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: amenities.length,
-                      itemBuilder: (lbCtx, index) {
-                        final amenity = amenities[index];
-                        return _buildAmenitiesRow(
-                          amenity: amenity,
-                          onPressed: () {
-                            setState(() {
-                              amenity.isSelected = !amenity.isSelected;
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(
-                height: 12.0,
-              ),
-
-              // LOCATION
-              _buildContainer(
-                child: _buildLocation(),
-              ),
-
-              const SizedBox(
-                height: 12.0,
-              ),
-
-              // CONTACT INFO
-              _buildContainer(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(
-                      text: 'CONTACT INFO',
-                    ),
-                    // Email
-                    _buildTextField(
-                      labelText: 'Email',
-                      hintText: 'Your email address',
-                      inputType: TextInputType.emailAddress,
-                      validator: (text) {},
-                      onSaved: (text) {},
-                    ),
-                    // Phone
-                    _buildTextField(
-                      labelText: 'Phone Number',
-                      hintText: 'Your phone number',
-                      inputType: TextInputType.phone,
-                      validator: (text) {},
-                      onSaved: (text) {},
-                    ),
-                    // Email
-                    _buildTextField(
-                      labelText: 'Website',
-                      hintText: 'Your website url',
-                      inputType: TextInputType.url,
-                      validator: (text) {},
-                      onSaved: (text) {},
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(
-                height: 12.0,
-              ),
-
-              // SOCIAL NETWORK
-              _buildContainer(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(text: 'SOCIAL NETWORK'),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    Text(
-                      'Social Network',
-                      style: TextStyle(
-                        fontFamily: GoloFont,
-                        fontSize: 16,
-                      ),
-                    ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: socialNetwork.length,
-                      itemBuilder: (lbCtx, index) {
-                        final network = socialNetwork[index];
-                        return _buildSocialNetworkRow(
-                          socialNetwork: network,
-                          onPressed: () {
-                            setState(() {
-                              socialNetwork.removeAt(index);
-                            });
-                          },
-                        );
-                      },
-                    ),
-                    SizedBox(
-                      height: 12.0,
-                    ),
-                    InkWell(
-                      onTap: () {
-                        final socialRow = _getSocialNetworkConst();
-                        socialNetwork.add(socialRow);
-                        setState(() {});
-                      },
-                      child: Chip(
-                        backgroundColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            50,
-                          ),
-                          side: BorderSide(
-                            color: Colors.black,
-                            width: 1.0,
-                          ),
-                        ),
-                        avatar: Icon(
-                          Icons.add,
-                        ),
-                        label: Text(
-                          'Add More',
-                          style: TextStyle(
-                            fontFamily: GoloFont,
-                            fontSize: 16.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(
-                height: 12.0,
-              ),
-
-              // OPENING HOURS
-              _buildContainer(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(text: 'OPENING HOUR'),
-                    ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: openingHours.length,
-                      itemBuilder: (lbCtx, index) {
-                        final hour = openingHours[index];
-                        return _buildOpeningHourRow(
-                          openingHour: hour,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(
-                height: 12.0,
-              ),
-
-              _buildContainer(
-                child: _buildMedia(),
-              ),
-
-              const SizedBox(
-                height: 12.0,
-              ),
-
-              ButtonTheme(
-                height: 50.0,
-                child: RaisedButton(
-                  textColor: Colors.white,
-                  color: GoloColors.primary,
-                  shape: StadiumBorder(),
-                  onPressed: () {},
-                  child: Text(
-                    "Submit",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+        child: FutureBuilder(
+          future: _future,
+          builder: (fbCtx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: Text(
+                  'Please wait...',
+                  style: TextStyle(
+                    fontSize: 22.0,
+                    fontFamily: GoloFont,
                   ),
                 ),
+              );
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Error while fetching resource.\nPlease Try again later!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22.0,
+                    fontFamily: GoloFont,
+                  ),
+                ),
+              );
+            }
+            return Form(
+              key: _formKey,
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.all(
+                  12.0,
+                ),
+                children: [
+                  // GENERAL
+                  _buildContainer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(text: 'GENERAL'),
+                        const SizedBox(
+                          height: 8.0,
+                        ),
+                        // Place Name
+                        _buildTextField(
+                          labelText: 'Place Name (en)*',
+                          hintText: 'Enter your business name',
+                          validator: (text) {},
+                          onSaved: (text) {},
+                        ),
+                        // Price Range
+                        _buildTextField(
+                          labelText: 'Price Range',
+                          hintText: 'Enter your price range',
+                          validator: (text) {},
+                          onSaved: (text) {},
+                        ),
+                        const SizedBox(
+                          height: 12,
+                        ),
+                        // Description
+                        Text(
+                          'Description (en)*',
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            fontFamily: GoloFont,
+                          ),
+                        ),
+                        Container(
+                          height: 120,
+                          margin: const EdgeInsets.only(top: 12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4.0),
+                            border: Border.all(
+                              width: 0.5,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          child: TextField(
+                            keyboardType: TextInputType.multiline,
+                            cursorColor: Colors.black,
+                            maxLines: null,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        // Select Category
+                        _buildTextField(
+                          controller: _categoryController,
+                          labelText: 'Category *',
+                          hintText: 'Select Category',
+                          isReadOnly: true,
+                          validator: (text) {},
+                          onSaved: (text) {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) {
+                                  return SelectionScreen(
+                                    selectionType: SelectionType.category,
+                                    objInitialData: objInitialData,
+                                    onSelectValue: (arrSelected) {
+                                      _setSelectedCategory(
+                                        arrSelected: arrSelected,
+                                      );
+                                    },
+                                  );
+                                },
+                                fullscreenDialog: true,
+                              ),
+                            );
+                          },
+                        ),
+                        // Place Type
+                        _buildTextField(
+                          labelText: 'Place Type *',
+                          hintText: 'Select Place Type in Your Category',
+                          validator: (text) {},
+                          onSaved: (text) {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 12.0,
+                  ),
+
+                  // AMENITIES
+                  _buildContainer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(text: 'AMENITIES'),
+                        SizedBox(
+                          height: 8.0,
+                        ),
+                        ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: objInitialData.arrAmenity.length,
+                          itemBuilder: (lbCtx, index) {
+                            final amenity = objInitialData.arrAmenity[index];
+                            return _buildAmenitiesRow(
+                              amenity: amenity,
+                              onPressed: () {
+                                setState(() {
+                                  amenity.isSelected = !amenity.isSelected;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 12.0,
+                  ),
+
+                  // LOCATION
+                  _buildContainer(
+                    child: _buildLocation(),
+                  ),
+
+                  const SizedBox(
+                    height: 12.0,
+                  ),
+
+                  // CONTACT INFO
+                  _buildContainer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(
+                          text: 'CONTACT INFO',
+                        ),
+                        // Email
+                        _buildTextField(
+                          labelText: 'Email',
+                          hintText: 'Your email address',
+                          inputType: TextInputType.emailAddress,
+                          validator: (text) {},
+                          onSaved: (text) {},
+                        ),
+                        // Phone
+                        _buildTextField(
+                          labelText: 'Phone Number',
+                          hintText: 'Your phone number',
+                          inputType: TextInputType.phone,
+                          validator: (text) {},
+                          onSaved: (text) {},
+                        ),
+                        // Email
+                        _buildTextField(
+                          labelText: 'Website',
+                          hintText: 'Your website url',
+                          inputType: TextInputType.url,
+                          validator: (text) {},
+                          onSaved: (text) {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 12.0,
+                  ),
+
+                  // SOCIAL NETWORK
+                  _buildContainer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(text: 'SOCIAL NETWORK'),
+                        SizedBox(
+                          height: 8.0,
+                        ),
+                        Text(
+                          'Social Network',
+                          style: TextStyle(
+                            fontFamily: GoloFont,
+                            fontSize: 16,
+                          ),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: socialNetwork.length,
+                          itemBuilder: (lbCtx, index) {
+                            final network = socialNetwork[index];
+                            return _buildSocialNetworkRow(
+                              socialNetwork: network,
+                              onPressed: () {
+                                setState(() {
+                                  socialNetwork.removeAt(index);
+                                });
+                              },
+                            );
+                          },
+                        ),
+                        SizedBox(
+                          height: 12.0,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            final socialRow = _getSocialNetworkConst();
+                            socialNetwork.add(socialRow);
+                            setState(() {});
+                          },
+                          child: Chip(
+                            backgroundColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                50,
+                              ),
+                              side: BorderSide(
+                                color: Colors.black,
+                                width: 1.0,
+                              ),
+                            ),
+                            avatar: Icon(
+                              Icons.add,
+                            ),
+                            label: Text(
+                              'Add More',
+                              style: TextStyle(
+                                fontFamily: GoloFont,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 12.0,
+                  ),
+
+                  // OPENING HOURS
+                  _buildContainer(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(text: 'OPENING HOUR'),
+                        ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: openingHours.length,
+                          itemBuilder: (lbCtx, index) {
+                            final hour = openingHours[index];
+                            return _buildOpeningHourRow(
+                              openingHour: hour,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 12.0,
+                  ),
+
+                  _buildContainer(
+                    child: _buildMedia(),
+                  ),
+
+                  const SizedBox(
+                    height: 12.0,
+                  ),
+
+                  ButtonTheme(
+                    height: 50.0,
+                    child: RaisedButton(
+                      textColor: Colors.white,
+                      color: GoloColors.primary,
+                      shape: StadiumBorder(),
+                      onPressed: () {},
+                      child: Text(
+                        "Submit",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -502,18 +549,24 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   //
   Widget _buildTextField({
     @required String labelText,
+    TextEditingController controller,
     String hintText,
     String initialValue,
     TextInputType inputType = TextInputType.name,
     IconData shuffixIcon,
+    bool isReadOnly = false,
+    Function() onTap,
     @required Function(String) validator,
     @required Function(String) onSaved,
   }) {
     return TextFormField(
+      controller: controller,
       initialValue: initialValue,
       autocorrect: false,
       keyboardType: inputType,
       cursorColor: Colors.black,
+      readOnly: isReadOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         suffixIcon: (shuffixIcon != null)
             ? Icon(
@@ -621,7 +674,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   // BUILD AMENITIES
   //
   Widget _buildAmenitiesRow({
-    @required Amenities amenity,
+    @required Amenity amenity,
     @required Function onPressed,
   }) {
     return GestureDetector(
@@ -675,18 +728,56 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         Column(
           children: [
             _buildTextField(
+              controller: _countryController,
               labelText: 'Country',
               hintText: 'Select Country',
               shuffixIcon: Icons.keyboard_arrow_down,
+              isReadOnly: true,
               validator: (text) {},
               onSaved: (text) {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) {
+                      return SelectionScreen(
+                        selectionType: SelectionType.country,
+                        objInitialData: objInitialData,
+                        onSelectValue: (arrSelected) {
+                          _setCountrySelected(arrSelected: arrSelected);
+                        },
+                      );
+                    },
+                    fullscreenDialog: true,
+                  ),
+                );
+              },
             ),
             _buildTextField(
+              controller: _cityController,
               labelText: 'City',
               hintText: 'Select City',
               shuffixIcon: Icons.keyboard_arrow_down,
+              isReadOnly: true,
               validator: (text) {},
               onSaved: (text) {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) {
+                      return SelectionScreen(
+                        selectionType: SelectionType.city,
+                        objInitialData: objInitialData,
+                        onSelectValue: (arrSelected) {
+                          _setCitySelected(arrSelected: arrSelected);
+                        },
+                      );
+                    },
+                    fullscreenDialog: true,
+                  ),
+                );
+              },
             ),
             _buildTextField(
               labelText: 'Full Address',
@@ -834,5 +925,65 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         ),
       ],
     );
+  }
+
+  //
+  // SET SELECTED DATA
+  //
+  _setCountrySelected({
+    @required List<SelectionData> arrSelected,
+  }) {
+    objInitialData.arrCountries.forEach((element) {
+      element.isSelected = false;
+    });
+    objInitialData.arrCity.forEach((element) {
+      element.isSelected = false;
+    });
+
+    final selected = arrSelected.firstWhere((element) => element.isSelected);
+    final country = objInitialData.arrCountries.firstWhere(
+      (ele) => ele.id == selected.id,
+    );
+    country.isSelected = true;
+    _countryController.text = country.name;
+    _selectedCountry = country;
+  }
+
+  _setCitySelected({
+    @required List<SelectionData> arrSelected,
+  }) {
+    objInitialData.arrCity.forEach((element) {
+      element.isSelected = false;
+    });
+    final selected = arrSelected.firstWhere((element) => element.isSelected);
+    final city = objInitialData.arrCity.firstWhere(
+      (ele) => ele.id == selected.id,
+    );
+    city.isSelected = true;
+    _selectedCity = city;
+    _cityController.text = city.name;
+  }
+
+  _setSelectedCategory({
+    @required List<SelectionData> arrSelected,
+  }) {
+    AppState().categories.forEach((element) {
+      element.isSelected = false;
+    });
+
+    arrSelected.forEach(
+      (element) {
+        final category =
+            AppState().categories.firstWhere((ele) => ele.id == element.id);
+        if (category != null) {
+          category.isSelected = true;
+        }
+      },
+    );
+
+    final selectedCat =
+        AppState().categories.where((e) => e.isSelected).toList();
+    _selectedCategory = selectedCat;
+    _categoryController.text = _selectedCategory.map((e) => e.name).join(', ');
   }
 }
