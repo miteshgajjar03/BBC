@@ -4,7 +4,6 @@ import 'package:den_lineicons/den_lineicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:getgolo/GeneralMethods/general_method.dart';
-import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/entity/User.dart';
@@ -87,18 +86,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _phoneController.text = objUser.phoneNumber;
     _facebookController.text = objUser.facebook;
     _instaController.text = objUser.instagram;
+    print(objUser.avatarUrl);
   }
 
   //
   // ShowImagePicker
   //
-  _showImagePicker() async {
-    final image = await _imagePicker.getImage(source: ImageSource.gallery);
+  _showImagePicker({
+    @required ImageSource source,
+  }) async {
+    final image = await _imagePicker.getImage(
+      source: source,
+    );
     if (image != null) {
       setState(() {
         _pickedImage = File(image.path);
       });
     }
+  }
+
+  //
+  // UpdateProfile
+  //
+  _updateProfile({
+    @required BuildContext buildContext,
+  }) async {
+    hideKeyboard(buildContext);
+    final progress = ProgressDialog(buildContext);
+    await progress.show();
+    final response = await ApiAuth.updateProfile(
+      dict: {
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'instagram': _instaController.text.trim(),
+        'facebook': _facebookController.text.trim(),
+        'phone_number': _phoneController.text.trim(),
+        'avatar': ''
+      },
+      imageFile: _pickedImage,
+      imageFieldName: 'avatar',
+    );
+    await progress.hide();
+    showSnackBar(
+      response.message,
+      buildContext,
+    );
+    print(response.message);
   }
 
   //
@@ -199,7 +232,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Center(
                   child: GestureDetector(
                     onTap: () async {
-                      _showImagePicker();
+                      showImagePickerActionSheet(
+                          context: context,
+                          selectedOption: (option) {
+                            switch (option) {
+                              case PhotoPickerOption.camera:
+                                _showImagePicker(source: ImageSource.camera);
+                                break;
+                              case PhotoPickerOption.photoLibrary:
+                                _showImagePicker(source: ImageSource.gallery);
+                                break;
+                              case PhotoPickerOption.cancel:
+                                break;
+                            }
+                          });
                     },
                     child: Container(
                       height: 160.0,
@@ -267,19 +313,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildActionButton(
                   title: 'Update',
                   onPressed: () async {
-                    final response = await ApiAuth.updateProfile(
-                      dict: {
-                        'name': objUser.name,
-                        'email': objUser.email,
-                        'instagram': objUser.instagram,
-                        'facebook': objUser.facebook,
-                        'phone_number': objUser.phoneNumber,
-                        'avatar': ''
-                      },
-                      imageFile: _pickedImage,
-                      imageFieldName: 'avatar',
+                    _updateProfile(
+                      buildContext: fbContext,
                     );
-                    print(response.message);
                   },
                 ),
                 SizedBox(

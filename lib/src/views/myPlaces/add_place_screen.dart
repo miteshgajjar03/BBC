@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/localization/Localized.dart';
 import 'package:getgolo/localization/LocalizedKey.dart';
+import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/modules/state/AppState.dart';
@@ -10,32 +15,41 @@ import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/PlaceInitialData.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 import 'package:getgolo/src/views/myPlaces/selection_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:getgolo/modules/services/platform/Platform.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class OpeningHour {
   String title;
   String hintText;
   String errorText;
-  String value;
+  TextEditingController valueController = TextEditingController();
 
   OpeningHour({
     this.title,
     this.hintText,
     this.errorText,
-    this.value,
   });
 }
 
 class SocialNetwork {
   String selectNetworkHintText;
-  String selectedNetwork;
   String networkURLHintText;
-  String networkURL;
+  TextEditingController networkController = TextEditingController();
+  TextEditingController urlController = TextEditingController();
 
   SocialNetwork({
     this.selectNetworkHintText,
     this.networkURLHintText,
-    this.selectedNetwork,
-    this.networkURL,
+  });
+}
+
+class GalleryImages {
+  String imageURL = '';
+  File pickedImage;
+  GalleryImages({
+    this.imageURL,
+    this.pickedImage,
   });
 }
 
@@ -46,20 +60,38 @@ class AddPlaceScreen extends StatefulWidget {
 
 class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  List<OpeningHour> openingHours = [];
-  List<SocialNetwork> socialNetwork = [];
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  List<OpeningHour> _openingHours = [];
+  List<SocialNetwork> _arrSocialNetwork = [];
   PlaceInitialData objInitialData = PlaceInitialData();
+
   Future<bool> _future;
-
-  // Text Editing Controllers
-  TextEditingController _categoryController = TextEditingController();
-
-  TextEditingController _countryController = TextEditingController();
-  TextEditingController _cityController = TextEditingController();
+  final _imagePicker = ImagePicker();
+  File _thumbImage;
+  List<GalleryImages> _arrGalleryImages = [];
 
   Country _selectedCountry;
   City _selectedCity;
   List<Category> _selectedCategory = [];
+  List<int> _selectedPlaceType = [];
+
+  // Text Editing Controllers
+  TextEditingController _placeNameController = TextEditingController();
+  TextEditingController _priceRangeController = TextEditingController();
+  TextEditingController _descriptionController = TextEditingController();
+
+  TextEditingController _categoryController = TextEditingController();
+  TextEditingController _placeTypeController = TextEditingController();
+
+  TextEditingController _countryController = TextEditingController();
+  TextEditingController _cityController = TextEditingController();
+  TextEditingController _addressController = TextEditingController();
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _websiteController = TextEditingController();
+
+  TextEditingController _videoURLController = TextEditingController();
 
   @override
   void initState() {
@@ -82,15 +114,13 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   //
   _initSocialNetwork() {
     final network = _getSocialNetworkConst();
-    socialNetwork.add(network);
+    _arrSocialNetwork.add(network);
   }
 
   SocialNetwork _getSocialNetworkConst() {
     return SocialNetwork(
-      networkURL: '',
       networkURLHintText: 'Enter url with http or www',
       selectNetworkHintText: 'Select Network',
-      selectedNetwork: '',
     );
   }
 
@@ -102,61 +132,228 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       title: 'Monday',
       hintText: 'Ex. 9:00 AM - 5:00 PM',
       errorText: '',
-      value: '',
     );
     final tuesday = OpeningHour(
       title: 'Tuesday',
       hintText: 'Ex. 9:00 AM - 5:00 PM',
       errorText: '',
-      value: '',
     );
     final wednesday = OpeningHour(
       title: 'Wednesday',
       hintText: 'Ex. 9:00 AM - 5:00 PM',
       errorText: '',
-      value: '',
     );
     final thursday = OpeningHour(
       title: 'Thursday',
       hintText: 'Ex. 9:00 AM - 5:00 PM',
       errorText: '',
-      value: '',
     );
     final friday = OpeningHour(
       title: 'Friday',
       hintText: 'Ex. 9:00 AM - 5:00 PM',
       errorText: '',
-      value: '',
     );
     final saturday = OpeningHour(
       title: 'Saturday',
       hintText: 'Ex. 9:00 AM - 5:00 PM',
       errorText: '',
-      value: '',
     );
     final sunday = OpeningHour(
       title: 'Sunday',
       hintText: 'Ex. 9:00 AM - 5:00 PM',
       errorText: '',
-      value: '',
     );
 
-    openingHours.add(monday);
-    openingHours.add(tuesday);
-    openingHours.add(wednesday);
-    openingHours.add(thursday);
-    openingHours.add(friday);
-    openingHours.add(saturday);
-    openingHours.add(sunday);
+    _openingHours.add(monday);
+    _openingHours.add(tuesday);
+    _openingHours.add(wednesday);
+    _openingHours.add(thursday);
+    _openingHours.add(friday);
+    _openingHours.add(saturday);
+    _openingHours.add(sunday);
+  }
+
+  //
+  // ValidateInput
+  //
+  _addPlace() async {
+    final ctx = _formKey.currentContext;
+    if (_placeNameController.text.trim().isEmpty) {
+      showSnackBar('Please enter place name', ctx);
+    } else if (_descriptionController.text.trim().isEmpty) {
+      showSnackBar('Please enter description about your place', ctx);
+    } else if (_selectedCategory.length == 0) {
+      showSnackBar('Please select category of your place', ctx);
+    } else if (_selectedPlaceType.length != 0) {
+      showSnackBar('Please select your place type', ctx);
+    } else if (_selectedCountry == null || _selectedCountry.id == 0) {
+      showSnackBar('Please select country', ctx);
+    } else if (_selectedCity == null || _selectedCity.id == 0) {
+      showSnackBar('Please select city', ctx);
+    } else if (_addressController.text.trim().length == 0) {
+      showSnackBar('Please enter your place address', ctx);
+    } else if (_emailController.text.trim().length > 0 &&
+        !isValidEmail(_emailController.text)) {
+      showSnackBar('Please enter valid email id', ctx);
+    } else {
+      Map<String, dynamic> requestDict = {};
+      requestDict['name'] = _placeNameController.text.trim();
+      requestDict['slug'] = _placeNameController.text.trim();
+      requestDict['description'] = _descriptionController.text.trim();
+      requestDict['category'] =
+          _selectedCategory.map((e) => e.id).toList().toString();
+      requestDict['place_type'] = [123].toString();
+
+      requestDict['country_id'] = _selectedCountry.id;
+      requestDict['city_id'] = _selectedCity.id;
+      requestDict['address'] = _addressController.text.trim();
+
+      requestDict['price_range'] = _priceRangeController.text.trim();
+
+      final selectedAmenityIDs = objInitialData.arrAmenity
+          .where((amenity) => amenity.isSelected)
+          .map((e) => e.id)
+          .toList();
+      requestDict['amenities'] = selectedAmenityIDs.toString();
+
+      requestDict['lat'] = _selectedCity.latitude;
+      requestDict['lng'] = _selectedCity.longitude;
+
+      requestDict['email'] = _emailController.text.trim();
+      requestDict['phone_number'] = _phoneController.text.trim();
+      requestDict['website'] = _websiteController.text.trim();
+
+      List<Map<String, dynamic>> social = [];
+      _arrSocialNetwork.forEach((element) {
+        if (element.urlController.text.trim().length > 0) {
+          Map<String, dynamic> dictSocial = {};
+          dictSocial['name'] = element.networkController.text.trim();
+          dictSocial['url'] = element.urlController.text.trim();
+          social.add(dictSocial);
+        }
+      });
+      requestDict['social'] = social;
+
+      List<Map<String, dynamic>> opening = [];
+      _openingHours.forEach((element) {
+        if (element.valueController.text.trim().length > 0) {
+          Map<String, dynamic> dictHour = {};
+          dictHour['title'] = element.title.trim();
+          dictHour['value'] = element.valueController.text.trim();
+          opening.add(dictHour);
+        }
+      });
+
+      requestDict['opening_hour'] = opening;
+
+      final arrPickedImages =
+          _arrGalleryImages.map((e) => e.pickedImage).toList();
+      if (arrPickedImages.length > 0) {
+        final arrURLs = await _uploadGalleryImage(images: arrPickedImages);
+        requestDict['gallery'] = arrURLs;
+      }
+
+      requestDict['video'] = _videoURLController.text.trim();
+      final api = Platform().shared.baseUrl + "app/places/createPlace";
+
+      final progress = ProgressDialog(ctx);
+      parseResponse({
+        @required ResponseData response,
+      }) async {
+        await progress.hide();
+        try {
+          final res = json.decode(response.json) as Map<String, dynamic>;
+          if (res['code'] as int == 200) {
+            final dictData = res['data'] as Map<String, dynamic>;
+            final message = dictData['data'] as String;
+            showSnackBar(message, ctx);
+            Future.delayed(Duration(seconds: 2)).then(
+              (value) => Navigator.of(ctx).pop(),
+            );
+          }
+        } catch (error) {
+          showSnackBar(error.toString(), ctx);
+        }
+      }
+
+      await progress.show();
+      if (_thumbImage != null) {
+        print('REQUEST DICT WITH THUMB :: $requestDict');
+        final res = await Api.requestPostUploadImage(
+          api,
+          _thumbImage,
+          'thumb',
+          requestDict,
+        );
+        parseResponse(response: res);
+      } else {
+        print('REQUEST DICT WITHOUT THUMB:: $requestDict');
+        requestDict['thumb'] = '';
+        final res = await Api.requestPost(
+          api,
+          requestDict,
+          null,
+        );
+        parseResponse(response: res);
+      }
+    }
+  }
+
+  //
+  // Show Social Network Options
+  //
+  _showSocialNetworkOptions({
+    @required Function(String) selectedNetwork,
+  }) {
+    final ctx = _formKey.currentContext;
+    showDialog(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return Material(
+          color: Colors.transparent,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(12.0),
+              margin: const EdgeInsets.all(12.0),
+              color: Colors.white,
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  ListTile(
+                    title: Text('Facebook'),
+                    onTap: () {
+                      selectedNetwork('Facebook');
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ListTile(
+                    title: Text('Instagram'),
+                    onTap: () {
+                      selectedNetwork('Instagram');
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: buildAppBar(
         title: Localized.of(context).trans(LocalizedKey.addPlace) ?? "",
         showBackButton: true,
         backOnPressed: () {
+          AppState().categories.forEach((element) {
+            element.isSelected = false;
+          });
           Navigator.of(context).pop();
         },
       ),
@@ -208,6 +405,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ),
                         // Place Name
                         _buildTextField(
+                          controller: _placeNameController,
                           labelText: 'Place Name (en)*',
                           hintText: 'Enter your business name',
                           validator: (text) {},
@@ -215,6 +413,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ),
                         // Price Range
                         _buildTextField(
+                          controller: _priceRangeController,
                           labelText: 'Price Range',
                           hintText: 'Enter your price range',
                           validator: (text) {},
@@ -233,7 +432,12 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ),
                         Container(
                           height: 120,
-                          margin: const EdgeInsets.only(top: 12.0),
+                          margin: const EdgeInsets.only(top: 8.0),
+                          padding: const EdgeInsets.only(
+                            top: 0,
+                            left: 8.0,
+                            right: 8.0,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(4.0),
@@ -243,6 +447,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                             ),
                           ),
                           child: TextField(
+                            controller: _descriptionController,
                             keyboardType: TextInputType.multiline,
                             cursorColor: Colors.black,
                             maxLines: null,
@@ -281,6 +486,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ),
                         // Place Type
                         _buildTextField(
+                          controller: _placeTypeController,
                           labelText: 'Place Type *',
                           hintText: 'Select Place Type in Your Category',
                           validator: (text) {},
@@ -346,6 +552,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ),
                         // Email
                         _buildTextField(
+                          controller: _emailController,
                           labelText: 'Email',
                           hintText: 'Your email address',
                           inputType: TextInputType.emailAddress,
@@ -354,14 +561,16 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ),
                         // Phone
                         _buildTextField(
+                          controller: _phoneController,
                           labelText: 'Phone Number',
                           hintText: 'Your phone number',
                           inputType: TextInputType.phone,
                           validator: (text) {},
                           onSaved: (text) {},
                         ),
-                        // Email
+                        // Website
                         _buildTextField(
+                          controller: _websiteController,
                           labelText: 'Website',
                           hintText: 'Your website url',
                           inputType: TextInputType.url,
@@ -395,14 +604,14 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount: socialNetwork.length,
+                          itemCount: _arrSocialNetwork.length,
                           itemBuilder: (lbCtx, index) {
-                            final network = socialNetwork[index];
+                            final network = _arrSocialNetwork[index];
                             return _buildSocialNetworkRow(
                               socialNetwork: network,
                               onPressed: () {
                                 setState(() {
-                                  socialNetwork.removeAt(index);
+                                  _arrSocialNetwork.removeAt(index);
                                 });
                               },
                             );
@@ -414,7 +623,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         InkWell(
                           onTap: () {
                             final socialRow = _getSocialNetworkConst();
-                            socialNetwork.add(socialRow);
+                            _arrSocialNetwork.add(socialRow);
                             setState(() {});
                           },
                           child: Chip(
@@ -457,9 +666,9 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ListView.builder(
                           physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
-                          itemCount: openingHours.length,
+                          itemCount: _openingHours.length,
                           itemBuilder: (lbCtx, index) {
-                            final hour = openingHours[index];
+                            final hour = _openingHours[index];
                             return _buildOpeningHourRow(
                               openingHour: hour,
                             );
@@ -487,7 +696,9 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                       textColor: Colors.white,
                       color: GoloColors.primary,
                       shape: StadiumBorder(),
-                      onPressed: () {},
+                      onPressed: () {
+                        _addPlace();
+                      },
                       child: Text(
                         "Submit",
                         style: TextStyle(
@@ -580,7 +791,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         ),
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(
-            color: GoloColors.primary,
+            color: isReadOnly ? Colors.grey : GoloColors.primary,
           ),
         ),
         hintText: hintText,
@@ -618,10 +829,13 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         Expanded(
           flex: 1,
           child: _buildTextField(
+            controller: openingHour.valueController,
             labelText: null,
             hintText: openingHour.hintText,
             validator: (text) {},
-            onSaved: (text) {},
+            onSaved: (text) {
+              openingHour.valueController.text = text;
+            },
           ),
         )
       ],
@@ -640,11 +854,20 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         Expanded(
           flex: 1,
           child: _buildTextField(
+            controller: socialNetwork.networkController,
+            isReadOnly: true,
             shuffixIcon: Icons.keyboard_arrow_down,
             labelText: null,
             hintText: socialNetwork.selectNetworkHintText,
             validator: (text) {},
             onSaved: (text) {},
+            onTap: () {
+              _showSocialNetworkOptions(selectedNetwork: (selectedValue) {
+                setState(() {
+                  socialNetwork.networkController.text = selectedValue;
+                });
+              });
+            },
           ),
         ),
         SizedBox(
@@ -653,10 +876,13 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         Expanded(
           flex: 1,
           child: _buildTextField(
+            controller: socialNetwork.urlController,
             labelText: null,
             hintText: socialNetwork.networkURLHintText,
             validator: (text) {},
-            onSaved: (text) {},
+            onSaved: (text) {
+              socialNetwork.urlController.text = text;
+            },
           ),
         ),
         IconButton(
@@ -780,6 +1006,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               },
             ),
             _buildTextField(
+              controller: _addressController,
               labelText: 'Full Address',
               hintText: 'Address',
               validator: (text) {},
@@ -813,7 +1040,23 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           height: 8.0,
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            showImagePickerActionSheet(
+              context: context,
+              selectedOption: (option) {
+                switch (option) {
+                  case PhotoPickerOption.camera:
+                    _showImagePicker(source: ImageSource.camera);
+                    break;
+                  case PhotoPickerOption.photoLibrary:
+                    _showImagePicker(source: ImageSource.gallery);
+                    break;
+                  case PhotoPickerOption.cancel:
+                    break;
+                }
+              },
+            );
+          },
           child: Container(
             height: 120,
             width: 120,
@@ -821,7 +1064,15 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               color: Colors.grey[400],
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: Icon(Icons.cloud_upload),
+            child: (_thumbImage == null)
+                ? Icon(Icons.cloud_upload)
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.file(
+                      _thumbImage,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
           ),
         ),
         const SizedBox(
@@ -840,52 +1091,72 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         LayoutBuilder(
           builder: (lbCtx, constraint) {
             final oneFourth = constraint.maxWidth / 4;
-            return Container(
-              height: oneFourth,
-              child: GridView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                //physics: NeverScrollableScrollPhysics(),
-                itemCount: 5,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1,
-                  crossAxisSpacing: 12.0,
-                  mainAxisSpacing: 12.0,
-                ),
-                itemBuilder: (ctx, index) {
-                  return Container(
+            return (_arrGalleryImages.length > 0)
+                ? Container(
                     height: oneFourth,
-                    width: oneFourth,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4.0),
-                      child: Stack(
-                        children: [
-                          Image(
-                            image: AssetImage('assets/photos/paris.jpg'),
-                            fit: BoxFit.cover,
-                            height: oneFourth,
-                            width: oneFourth,
-                          ),
-                          Positioned(
-                            top: -8,
-                            right: -8,
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.delete,
-                                color: Colors.black,
-                              ),
-                              onPressed: () {
-                                print('Delete');
-                              },
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      //physics: NeverScrollableScrollPhysics(),
+                      itemCount: _arrGalleryImages.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 1,
+                        crossAxisSpacing: 12.0,
+                        mainAxisSpacing: 12.0,
+                      ),
+                      itemBuilder: (ctx, index) {
+                        final objImage = _arrGalleryImages[index];
+                        return Container(
+                          height: oneFourth,
+                          width: oneFourth,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4.0),
+                            child: Stack(
+                              children: [
+                                (objImage.imageURL.length > 0)
+                                    ? Image.network(
+                                        objImage.imageURL,
+                                        fit: BoxFit.fill,
+                                        height: oneFourth,
+                                        width: oneFourth,
+                                      )
+                                    : (objImage.pickedImage != null)
+                                        ? Image.file(
+                                            objImage.pickedImage,
+                                            fit: BoxFit.fill,
+                                            height: oneFourth,
+                                            width: oneFourth,
+                                          )
+                                        : null,
+                                // Image(
+                                //   image: AssetImage('assets/photos/paris.jpg'),
+                                //   fit: BoxFit.cover,
+                                //   height: oneFourth,
+                                //   width: oneFourth,
+                                // ),
+                                Positioned(
+                                  top: -8,
+                                  right: -8,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.close,
+                                      color: Colors.black,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _arrGalleryImages.removeAt(index);
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-            );
+                  )
+                : Container();
           },
         ),
         const SizedBox(
@@ -896,7 +1167,29 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           children: [
             FlatButton.icon(
               color: Colors.grey[400],
-              onPressed: () {},
+              onPressed: () {
+                showImagePickerActionSheet(
+                  context: context,
+                  selectedOption: (option) {
+                    switch (option) {
+                      case PhotoPickerOption.camera:
+                        _showImagePicker(
+                          source: ImageSource.camera,
+                          isGalleryImage: true,
+                        );
+                        break;
+                      case PhotoPickerOption.photoLibrary:
+                        _showImagePicker(
+                          source: ImageSource.gallery,
+                          isGalleryImage: true,
+                        );
+                        break;
+                      case PhotoPickerOption.cancel:
+                        break;
+                    }
+                  },
+                );
+              },
               icon: Icon(Icons.cloud_upload),
               label: Text(
                 'Upload Images',
@@ -918,6 +1211,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           width: 8.0,
         ),
         _buildTextField(
+          controller: _videoURLController,
           labelText: null,
           hintText: 'Youtube, Vimeo video url',
           validator: (text) {},
@@ -985,5 +1279,61 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         AppState().categories.where((e) => e.isSelected).toList();
     _selectedCategory = selectedCat;
     _categoryController.text = _selectedCategory.map((e) => e.name).join(', ');
+  }
+
+  //
+  // ShowImagePicker
+  //
+  _showImagePicker({
+    @required ImageSource source,
+    bool isGalleryImage = false,
+  }) async {
+    final image = await _imagePicker.getImage(
+      source: source,
+    );
+    if (image != null) {
+      setState(() {
+        if (isGalleryImage) {
+          _arrGalleryImages.add(
+            GalleryImages(
+              pickedImage: File(image.path),
+              imageURL: '',
+            ),
+          );
+        } else {
+          _thumbImage = File(image.path);
+        }
+      });
+    }
+  }
+
+  //
+  // Upload Gallery Image
+  //
+  Future<List<String>> _uploadGalleryImage({
+    @required List<File> images,
+  }) async {
+    List<String> urls = [];
+    final api = Platform().shared.baseUrl + "app/upload-image";
+
+    await Future.forEach(images, (element) async {
+      final galleryImg = element as File;
+      final response = await Api.requestPostUploadImage(
+        api,
+        galleryImg,
+        'image',
+        null,
+      );
+      try {
+        final res = json.decode(response.json) as Map<String, dynamic>;
+        print('RES :: $res');
+        final resData = res['data'] as Map<String, dynamic>;
+        final uploadedURL = resData['data'] as String;
+        urls.add(uploadedURL);
+      } catch (error) {
+        print('ERROR WHILE UPLOADING GALLERY IMAGE :: ${error.toString()}');
+      }
+    });
+    return urls;
   }
 }

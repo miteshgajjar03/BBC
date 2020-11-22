@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:getgolo/modules/setting/fonts.dart';
 
 showConfirmationAlert({
   @required BuildContext context,
@@ -135,4 +136,106 @@ bool isValidEmail(String em) {
       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
   RegExp regExp = new RegExp(p);
   return regExp.hasMatch(em);
+}
+
+//
+// ImagePicker ActionSheet
+//
+enum PhotoPickerOption { camera, photoLibrary, cancel }
+showImagePickerActionSheet({
+  @required BuildContext context,
+  @required Function(PhotoPickerOption) selectedOption,
+}) {
+  if (Platform.isIOS) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) {
+        return CupertinoActionSheet(
+          actions: [
+            CupertinoActionSheetAction(
+              child: Text(
+                'Camera',
+                style: TextStyle(
+                  fontFamily: GoloFont,
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+              onPressed: () {
+                selectedOption(PhotoPickerOption.camera);
+                Navigator.pop(context);
+              },
+            ),
+            CupertinoActionSheetAction(
+              child: Text(
+                'Photo Library',
+                style: TextStyle(
+                  fontFamily: GoloFont,
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+              onPressed: () {
+                selectedOption(PhotoPickerOption.photoLibrary);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                fontFamily: GoloFont,
+                fontSize: 16,
+                color: Colors.black,
+              ),
+            ),
+            onPressed: () {
+              selectedOption(PhotoPickerOption.cancel);
+              Navigator.pop(context);
+            },
+          ),
+        );
+      },
+    );
+  } else {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return Container(
+          height: 350.0,
+          child: ListView(
+            children: [
+              ListTile(
+                title: Text(
+                  'Camera',
+                  style: TextStyle(
+                    fontFamily: GoloFont,
+                    fontSize: 16,
+                  ),
+                ),
+                onTap: () {
+                  selectedOption(PhotoPickerOption.camera);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(
+                  'Gallery',
+                  style: TextStyle(
+                    fontFamily: GoloFont,
+                    fontSize: 16,
+                  ),
+                ),
+                onTap: () {
+                  selectedOption(PhotoPickerOption.photoLibrary);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

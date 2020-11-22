@@ -20,7 +20,7 @@ enum RequestType { Get, Post }
 class Api {
   // POST
   static Future<ResponseData> requestPost(
-      String api, Map<String, String> query, Map<String, dynamic> body) {
+      String api, Map<String, dynamic> query, Map<String, dynamic> body) {
     return _request(RequestType.Post, _makeUrl(api, query), body: body);
   }
 
@@ -33,7 +33,12 @@ class Api {
   static Future<ResponseData> requestGetPaging(
       String api, PageQuery query) async {
     return await _request(
-        RequestType.Get, _makeUrl(api, query != null ? query.toQuery() : null));
+      RequestType.Get,
+      _makeUrl(
+        api,
+        query != null ? query.toQuery() : null,
+      ),
+    );
   }
 
   static Future<ResponseData> requestPostUploadImage(
@@ -103,6 +108,7 @@ class Api {
     String imageFieldName,
   ) async {
     var postUri = Uri.parse(url);
+    print('UPLOAD IMAGE URL :: $postUri');
     MultipartRequest request = MultipartRequest("POST", postUri);
     request.headers.addAll(_getHeader());
     MultipartFile multipartFile = await MultipartFile.fromPath(
@@ -117,6 +123,7 @@ class Api {
     final responseString = String.fromCharCodes(responseData);
 
     int statusCode = response.statusCode;
+    print('UPLOAD IMAGE API RESPONSE :: $responseString');
     if (statusCode == 200) {
       return ResponseData(responseString, null);
     } else if (statusCode == 401) {
@@ -133,10 +140,10 @@ class Api {
   }
 
   static String _makeUrl(String api, Map<String, dynamic> query) {
-    var params = [];
+    List<dynamic> params = [];
     if (query != null) {
       query.forEach((key, value) {
-        params.add(key + "=" + value);
+        params.add(key + "=" + value.toString());
       });
     } else {
       return api;
