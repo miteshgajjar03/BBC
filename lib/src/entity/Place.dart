@@ -94,10 +94,10 @@ class Place extends Base {
     address = json["address"];
     // Price range
     var value = json["price_range"];
-    if (value == null || value == "none") {
+    if (value == null || value == "None") {
       priceRange = "";
-    } else if (value == "free") {
-      priceRange = "free";
+    } else if (value == "Free") {
+      priceRange = "Free";
     } else {
       var count = value;
       priceRange = List<String>.generate(count, (int i) => r"$").join();

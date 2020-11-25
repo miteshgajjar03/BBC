@@ -208,7 +208,11 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       requestDict['city_id'] = _selectedCity.id;
       requestDict['address'] = _addressController.text.trim();
 
-      requestDict['price_range'] = _priceRangeController.text.trim();
+      if (_priceRangeController.text.trim().contains('\$')) {
+        requestDict['price_range'] = _priceRangeController.text.length;
+      } else {
+        requestDict['price_range'] = _priceRangeController.text.trim();
+      }
 
       final selectedAmenityIDs = objInitialData.arrAmenity
           .where((amenity) => amenity.isSelected)
@@ -245,18 +249,24 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       });
 
       requestDict['opening_hour'] = opening;
+      requestDict['video'] = _videoURLController.text.trim();
+
+      final progress = ProgressDialog(
+        ctx,
+        isDismissible: false,
+      );
 
       final arrPickedImages =
           _arrGalleryImages.map((e) => e.pickedImage).toList();
       if (arrPickedImages.length > 0) {
+        await progress.show();
         final arrURLs = await _uploadGalleryImage(images: arrPickedImages);
         requestDict['gallery'] = arrURLs;
+        print('IMAGE UPLOADED');
       }
 
-      requestDict['video'] = _videoURLController.text.trim();
       final api = Platform().shared.baseUrl + "app/places/createPlace";
 
-      final progress = ProgressDialog(ctx);
       parseResponse({
         @required ResponseData response,
       }) async {
@@ -268,7 +278,10 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             final message = dictData['data'] as String;
             showSnackBar(message, ctx);
             Future.delayed(Duration(seconds: 2)).then(
-              (value) => Navigator.of(ctx).pop(),
+              (value) {
+                _resetCategorySelection();
+                Navigator.of(ctx).pop();
+              },
             );
           }
         } catch (error) {
@@ -276,7 +289,9 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         }
       }
 
-      await progress.show();
+      if (!progress.isShowing()) {
+        await progress.show();
+      }
       if (_thumbImage != null) {
         print('REQUEST DICT WITH THUMB :: $requestDict');
         final res = await Api.requestPostUploadImage(
@@ -303,36 +318,65 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   // Show Social Network Options
   //
   _showSocialNetworkOptions({
+    bool showPriceRange = false,
     @required Function(String) selectedNetwork,
   }) {
     final ctx = _formKey.currentContext;
+    List<String> arrOptions = [];
+    if (showPriceRange) {
+      arrOptions = [
+        'None',
+        'Free',
+        '\$',
+        '\$\$',
+        '\$\$\$',
+        '\$\$\$\$',
+      ];
+    } else {
+      arrOptions = [
+        'Facebook',
+        'Instagram',
+        'Twitter',
+        'Youtube',
+        'Pinterest',
+        'Snapchat',
+      ];
+    }
     showDialog(
       context: ctx,
       barrierDismissible: true,
       builder: (ctx) {
-        return Material(
-          color: Colors.transparent,
-          child: Center(
-            child: Container(
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: Material(
+            type: MaterialType.card,
+            color: Colors.transparent,
+            child: Padding(
               padding: const EdgeInsets.all(12.0),
-              margin: const EdgeInsets.all(12.0),
-              color: Colors.white,
-              child: ListView(
-                shrinkWrap: true,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  ListTile(
-                    title: Text('Facebook'),
-                    onTap: () {
-                      selectedNetwork('Facebook');
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  ListTile(
-                    title: Text('Instagram'),
-                    onTap: () {
-                      selectedNetwork('Instagram');
-                      Navigator.of(context).pop();
-                    },
+                  Flexible(
+                    child: Container(
+                      color: Colors.white,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: arrOptions.length,
+                        itemBuilder: (lvBuilder, index) {
+                          final network = arrOptions[index];
+                          return ListTile(
+                            title: Text(network),
+                            onTap: () {
+                              selectedNetwork(network);
+                              Navigator.of(context).pop();
+                            },
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -343,6 +387,15 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     );
   }
 
+  //
+  // RESET CATEGORY SELECTION
+  //
+  _resetCategorySelection() {
+    AppState().categories.forEach((element) {
+      element.isSelected = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -351,9 +404,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         title: Localized.of(context).trans(LocalizedKey.addPlace) ?? "",
         showBackButton: true,
         backOnPressed: () {
-          AppState().categories.forEach((element) {
-            element.isSelected = false;
-          });
+          _resetCategorySelection();
           Navigator.of(context).pop();
         },
       ),
@@ -413,11 +464,23 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                         ),
                         // Price Range
                         _buildTextField(
+                          isReadOnly: true,
                           controller: _priceRangeController,
                           labelText: 'Price Range',
+                          shuffixIcon: Icons.keyboard_arrow_down,
                           hintText: 'Enter your price range',
                           validator: (text) {},
                           onSaved: (text) {},
+                          onTap: () {
+                            _showSocialNetworkOptions(
+                              showPriceRange: true,
+                              selectedNetwork: (selectedValue) {
+                                setState(() {
+                                  _priceRangeController.text = selectedValue;
+                                });
+                              },
+                            );
+                          },
                         ),
                         const SizedBox(
                           height: 12,

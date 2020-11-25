@@ -288,6 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   controller: _nameController,
                 ),
                 _buildTextField(
+                  isEnable: false,
                   labelText: 'Email',
                   inputType: TextInputType.emailAddress,
                   controller: _emailController,
@@ -361,21 +362,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     @required String labelText,
     TextInputType inputType = TextInputType.name,
     bool obscureText = false,
+    bool isEnable = true,
     @required TextEditingController controller,
   }) {
     return TextField(
+      enabled: isEnable,
       autocorrect: false,
       keyboardType: inputType,
       obscureText: obscureText,
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        // focusedBorder: UnderlineInputBorder(
-        //   borderSide: BorderSide(color: GoloColors.primary),
-        // ),
+        labelStyle: TextStyle(
+          color: Colors.black,
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: GoloColors.primary),
+        ),
       ),
       style: TextStyle(
         fontFamily: GoloFont,
+        color: isEnable ? Colors.black : Colors.grey,
       ),
     );
   }

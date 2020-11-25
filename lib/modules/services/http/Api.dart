@@ -111,13 +111,16 @@ class Api {
     print('UPLOAD IMAGE URL :: $postUri');
     MultipartRequest request = MultipartRequest("POST", postUri);
     request.headers.addAll(_getHeader());
-    MultipartFile multipartFile = await MultipartFile.fromPath(
-      imageFieldName,
-      imageFile.path,
-      filename: 'profile_image.png',
-    );
+    if (imageFile != null) {
+      MultipartFile multipartFile = await MultipartFile.fromPath(
+        imageFieldName,
+        imageFile.path,
+        filename: 'profile_image.png',
+      );
 
-    request.files.add(multipartFile);
+      request.files.add(multipartFile);
+    }
+
     StreamedResponse response = await request.send();
     final responseData = await response.stream.toBytes();
     final responseString = String.fromCharCodes(responseData);
