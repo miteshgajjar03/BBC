@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 
+final GOOGLE_API_KEY = 'AIzaSyAoUCsCGYIEP8aFtfETPDbPZOywkLZxbHo';
+
 showConfirmationAlert({
   @required BuildContext context,
   String title,
@@ -238,4 +240,32 @@ showImagePickerActionSheet({
       },
     );
   }
+}
+
+//
+// GET MAP IMAGE FROM LAT LONG
+//
+String getMapURLFrom({
+  @required latitude,
+  @required longitude,
+}) {
+  if (latitude == null || longitude == null) {
+    return '';
+  }
+  return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude,$longitude&radius=1500&key=$GOOGLE_API_KEY";
+}
+
+Widget getCenterInfoWidget({
+  @required String message,
+}) {
+  return Center(
+    child: Text(
+      message,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 22.0,
+        fontFamily: GoloFont,
+      ),
+    ),
+  );
 }

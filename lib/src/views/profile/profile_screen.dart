@@ -210,14 +210,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         future: _future,
         builder: (fbContext, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: Text(
-                'Fetchig user data...',
-                style: TextStyle(
-                  fontSize: 22.0,
-                  fontFamily: GoloFont,
-                ),
-              ),
+            return getCenterInfoWidget(
+              message: 'Fetchig user data...',
             );
           }
           if (snapshot.connectionState == ConnectionState.done) {

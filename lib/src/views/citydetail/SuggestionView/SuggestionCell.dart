@@ -2,6 +2,8 @@ import 'package:den_lineicons/den_lineicons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getgolo/modules/controls/images/MyImageHelper.dart';
+import 'package:getgolo/modules/services/http/Api.dart';
+import 'package:getgolo/modules/services/platform/Platform.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/entity/Place.dart';
@@ -34,53 +36,55 @@ class _SuggestionCell extends State<SuggestionCell> {
                 color: GoloColors.secondary3),
             Container(
               decoration: BoxDecoration(
-                  borderRadius: new BorderRadius.all(Radius.circular(15)),
-                  color: Colors.white,
-                  gradient: LinearGradient(
-                      begin: FractionalOffset.topCenter,
-                      end: FractionalOffset.bottomCenter,
-                      colors: [Colors.transparent, Colors.black.withAlpha(200)],
-                      stops: [0.4, 1.0])),
+                borderRadius: new BorderRadius.all(Radius.circular(15)),
+                color: Colors.white,
+                gradient: LinearGradient(
+                  begin: FractionalOffset.topCenter,
+                  end: FractionalOffset.bottomCenter,
+                  colors: [Colors.transparent, Colors.black.withAlpha(200)],
+                  stops: [0.4, 1.0],
+                ),
+              ),
             ),
             //3. Lable, title
             Container(
-                child: Column(
-              children: <Widget>[
-                Expanded(
-                  flex: 1,
-                  child: Container(),
-                ),
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              getPlaceTypes(widget.place) ?? "",
-                              style: TextStyle(
-                                  fontFamily: GoloFont,
-                                  fontSize: 14,
-                                  color: Colors.white),
-                            ),
-                          ),
-                          Container(
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Container(),
+                  ),
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            Container(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                widget.place.name ?? "",
+                                getPlaceTypes(widget.place) ?? "",
                                 style: TextStyle(
                                     fontFamily: GoloFont,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
                                     color: Colors.white),
-                                maxLines: 2,
-                              )),
-                        ],
-                      ),
-                      Container(
+                              ),
+                            ),
+                            Container(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  widget.place.name ?? "",
+                                  style: TextStyle(
+                                      fontFamily: GoloFont,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white),
+                                  maxLines: 2,
+                                )),
+                          ],
+                        ),
+                        Container(
                           height: 20,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,9 +105,13 @@ class _SuggestionCell extends State<SuggestionCell> {
                                     ),
                                   ),
                                   Visibility(
-                                      visible: widget.place.hasRate,
-                                      child: Icon(DenLineIcons.star,
-                                          color: GoloColors.primary, size: 11)),
+                                    visible: widget.place.hasRate,
+                                    child: Icon(
+                                      DenLineIcons.star,
+                                      color: GoloColors.primary,
+                                      size: 11,
+                                    ),
+                                  ),
                                   Container(
                                     alignment: Alignment.centerLeft,
                                     margin: EdgeInsets.only(left: 5),
@@ -121,36 +129,54 @@ class _SuggestionCell extends State<SuggestionCell> {
                               ),
                               Container(
                                 padding: EdgeInsets.only(right: 10),
-                                child: Text(widget.place.priceRange ?? r"$",
-                                    style: TextStyle(
-                                      fontFamily: GoloFont,
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                    )),
+                                child: Text(
+                                  widget.place.priceRange ?? r"$",
+                                  style: TextStyle(
+                                    fontFamily: GoloFont,
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                  ),
+                                ),
                               ),
                             ],
-                          ))
-                    ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            )),
+                ],
+              ),
+            ),
             //2. Button
             Align(
               alignment: Alignment.topRight,
               child: Container(
                 alignment: Alignment.center,
-                margin: EdgeInsets.only(top: 20, right: 20),
-                decoration:
-                    BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                margin: EdgeInsets.only(
+                  top: 8,
+                  right: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
                 height: 32,
                 width: 32,
                 child: CupertinoButton(
-                  padding:
-                      EdgeInsets.only(left: 0, top: 0, bottom: 0, right: 6),
-                  onPressed: () {},
-                  child: Icon(DenLineIcons.bookmark,
-                      size: 20, color: GoloColors.secondary2),
+                  padding: EdgeInsets.only(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    right: 6,
+                  ),
+                  onPressed: () {
+                    print('WISHLIST');
+                  },
+                  child: Icon(
+                    DenLineIcons.bookmark,
+                    size: 20,
+                    color: GoloColors.secondary2,
+                  ),
                 ),
               ),
             ),

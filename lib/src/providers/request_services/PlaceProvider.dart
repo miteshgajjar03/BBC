@@ -11,7 +11,8 @@ class PlaceProvider {
     var url = Platform().shared.baseUrl + "app/cities/$cityId";
     return Api.requestGetPaging(url, query).then((data) {
       var placesJson = data.json != null ? json.decode(data.json) as Map : null;
-      var jsonData = placesJson["data"]["features"] as List;
+      //var jsonData = placesJson["data"]["features"] as List;
+      var jsonData = placesJson["features"] as List;
       return ResponseListData(jsonData, data.error);
     });
   }

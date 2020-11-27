@@ -24,6 +24,10 @@ class PlaceDetailBloc implements Bloc {
     _place = place;
   }
 
+  int get place_id {
+    return _place.id;
+  }
+
   void fetchData(int placeId) async {
     final response = await PlaceProvider.getPlaceDetail("$placeId");
     print("Fetched places of city $placeId");
@@ -67,7 +71,9 @@ class PlaceDetailBloc implements Bloc {
           placeTypes.add(PlaceType.fromJson(json));
         }
       }
-      _placeController.sink.add(_place);
+      if (!_placeController.isClosed) {
+        _placeController.sink.add(_place);
+      }
     }
   }
 

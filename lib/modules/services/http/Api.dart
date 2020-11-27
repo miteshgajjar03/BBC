@@ -90,14 +90,6 @@ class Api {
       return ResponseData(response.body, null);
     } else if (statusCode == 401) {
       return ResponseData(response.body, null);
-      // var msg = "ERROR";
-      // if (response.body is String) {
-      //   var res = json.decode(response.body);
-      //   msg = (res["message"] as String) ?? "ERROR";
-      // } else {
-      //   print('Error while parsing data');
-      // }
-      // return ResponseData(null, msg);
     }
     return ResponseData(null, "Error while parsing data");
   }

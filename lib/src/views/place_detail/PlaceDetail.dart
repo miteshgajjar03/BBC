@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:getgolo/GeneralMethods/general_method.dart';
+import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/blocs/place_detail/PlaceDetailBloc.dart';
 import 'package:getgolo/src/providers/BlocProvider.dart';
 import 'package:den_lineicons/den_lineicons.dart';
@@ -14,6 +16,7 @@ import 'package:getgolo/src/views/place_detail/controls/Contact.dart';
 import 'package:getgolo/src/views/place_detail/controls/Header.dart';
 import 'package:getgolo/src/views/place_detail/controls/Review.dart';
 import 'package:getgolo/src/views/place_detail_overview/PlaceDetailOverview.dart';
+import 'package:getgolo/src/views/review_rating/review_list_screen.dart';
 
 import 'controls/Facilities.dart';
 import 'controls/OpenTime.dart';
@@ -61,203 +64,262 @@ class _PlaceDetailState extends State<PlaceDetail> {
     return BlocProvider<PlaceDetailBloc>(
       bloc: bloc,
       child: Scaffold(
-          backgroundColor: Colors.white,
-          body: StreamBuilder<Place>(
-              stream: bloc.placeController,
-              builder: (context, snapshot) {
-                print("===============> received stream event");
-                var place = snapshot.data;
-                return AnnotatedRegion<SystemUiOverlayStyle>(
-                    value: SystemUiOverlayStyle.light,
-                    child: Stack(
+        backgroundColor: Colors.white,
+        body: StreamBuilder<Place>(
+          stream: bloc.placeController,
+          builder: (context, snapshot) {
+            var place = snapshot.data;
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle.light,
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    child: Column(
                       children: <Widget>[
-                        Container(
-                          child: Column(
+                        Expanded(
+                          child: ListView(
+                            controller: _scrollController,
+                            padding: EdgeInsets.all(0),
                             children: <Widget>[
-                              Expanded(
-                                child: ListView(
-                                  controller: _scrollController,
-                                  padding: EdgeInsets.all(0),
+                              Container(
+                                height: 250,
+                                child: PlaceDetailHeader(
+                                  place: place,
+                                  category: bloc.categories.length > 0
+                                      ? bloc.categories.first.name
+                                      : "",
+                                ),
+                              ),
+                              Container(
+                                height: bloc.amenities.length > 0 ? 95 : 0,
+                                child: Column(
                                   children: <Widget>[
+                                    Expanded(
+                                        child: bloc.amenities.length > 0
+                                            ? FacilitiesView(
+                                                amenities: bloc.amenities,
+                                              )
+                                            : Container()),
                                     Container(
-                                        height: 250,
-                                        child: PlaceDetailHeader(
-                                          place: place,
-                                          category: bloc.categories.length > 0
-                                              ? bloc.categories.first.name
-                                              : "",
-                                        )),
-                                    Container(
-                                      height:
-                                          bloc.amenities.length > 0 ? 95 : 0,
-                                      child: Column(
-                                        children: <Widget>[
-                                          Expanded(
-                                              child: bloc.amenities.length > 0
-                                                  ? FacilitiesView(
-                                                      amenities: bloc.amenities,
-                                                    )
-                                                  : Container()),
-                                          Container(
-                                            height: 1,
-                                            color: GoloColors.secondary3
-                                                .withAlpha(180),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    // Overview
-                                    _buildOverview(place),
-                                    // MAP VIEW
-                                    _buildMapview(place),
-                                    // Location & contacts
-                                    _buildLocationAndContact(place),
-                                    // OPEN TIME
-                                    Visibility(
-                                      child: Container(
-                                        margin: EdgeInsets.only(
-                                            top: 25, left: 25, right: 25),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Container(
-                                              alignment: Alignment.topLeft,
-                                              child: Text("Opening Time",
-                                                  style: TextStyle(
-                                                      fontFamily: GoloFont,
-                                                      fontSize: 17,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: GoloColors
-                                                          .secondary1)),
-                                            ),
-                                            PlaceDetailOpenTime(
-                                              place: place,
-                                              showFull: showFullOpeningTime,
-                                            ),
-                                            Visibility(
-                                              child: CupertinoButton(
-                                                padding: EdgeInsets.all(0),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    showFullOpeningTime =
-                                                        !showFullOpeningTime;
-                                                  });
-                                                },
-                                                child: Text(
-                                                    showFullOpeningTime
-                                                        ? "Show less"
-                                                        : "Show more",
-                                                    style: TextStyle(
-                                                        fontFamily: GoloFont,
-                                                        fontSize: 16,
-                                                        color:
-                                                            GoloColors.primary,
-                                                        fontWeight:
-                                                            FontWeight.w500)),
-                                              ),
-                                              visible: (place != null
-                                                      ? place.openingTime.length
-                                                      : 0) >
-                                                  2,
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      visible: (place != null
-                                              ? place.openingTime.length
-                                              : 0) >
-                                          0,
-                                    ),
-                                    // REVIEW
-                                    Container(
-                                      margin: EdgeInsets.only(top: 25),
+                                      height: 1,
                                       color:
-                                          GoloColors.secondary1.withAlpha(15),
-                                      child: Container(
-                                        margin: EdgeInsets.all(25),
-                                        child: PlaceDetailReview(
-                                          place: place,
-                                          reviews: bloc.reviews,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 10,
+                                          GoloColors.secondary3.withAlpha(180),
                                     )
                                   ],
                                 ),
                               ),
-                              // Container(
-                              //   height: 80,
-                              //   alignment: Alignment.center,
-                              //   padding: EdgeInsets.only(bottom: 15),
-                              //   child: Container(
-                              //     height: 45,
-                              //     width: 300,
-                              //     decoration: BoxDecoration(
-                              //         color: GoloColors.primary,
-                              //         borderRadius: BorderRadius.all(Radius.circular(25))),
-                              //     child: FlatButton(
-                              //       onPressed: () {
-                              //         Navigator.pop(context);
-                              //       },
-                              //       child: Text(
-                              //         "Book",
-                              //         style: TextStyle(
-                              //             fontFamily: GoloFont,
-                              //             fontSize: 17,
-                              //             fontWeight: FontWeight.w500,
-                              //             color: Colors.white),
-                              //       ),
-                              //     ),
-                              //   ),
-                              // )
+                              // Overview
+                              _buildOverview(place),
+                              // MAP VIEW
+                              _buildMapview(place),
+                              // Location & contacts
+                              _buildLocationAndContact(place),
+                              // OPEN TIME
+                              Visibility(
+                                child: Container(
+                                  margin: EdgeInsets.only(
+                                    top: 25,
+                                    left: 25,
+                                    right: 25,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.topLeft,
+                                        child: Text("Opening Time",
+                                            style: TextStyle(
+                                                fontFamily: GoloFont,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w500,
+                                                color: GoloColors.secondary1)),
+                                      ),
+                                      PlaceDetailOpenTime(
+                                        place: place,
+                                        showFull: showFullOpeningTime,
+                                      ),
+                                      Visibility(
+                                        child: CupertinoButton(
+                                          padding: EdgeInsets.all(0),
+                                          onPressed: () {
+                                            setState(() {
+                                              showFullOpeningTime =
+                                                  !showFullOpeningTime;
+                                            });
+                                          },
+                                          child: Text(
+                                              showFullOpeningTime
+                                                  ? "Show less"
+                                                  : "Show more",
+                                              style: TextStyle(
+                                                  fontFamily: GoloFont,
+                                                  fontSize: 16,
+                                                  color: GoloColors.primary,
+                                                  fontWeight: FontWeight.w500)),
+                                        ),
+                                        visible: (place != null
+                                                ? place.openingTime.length
+                                                : 0) >
+                                            2,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                visible: (place != null
+                                        ? place.openingTime.length
+                                        : 0) >
+                                    0,
+                              ),
+                              // REVIEW
+                              if (bloc.reviews.length > 0)
+                                SafeArea(
+                                  maintainBottomViewPadding: true,
+                                  top: false,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      HomeNav(context: context).openReviewList(
+                                        review: bloc.reviews,
+                                        placeID: bloc.place_id,
+                                      );
+                                    },
+                                    child: Container(
+                                      height: 64.0,
+                                      padding: const EdgeInsets.all(12.0),
+                                      color:
+                                          GoloColors.secondary1.withAlpha(15),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Review (${bloc.reviews.length})',
+                                            style: TextStyle(
+                                              fontFamily: GoloFont,
+                                              fontSize: 21,
+                                              color: GoloColors.secondary1,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          Icon(
+                                            Icons.arrow_forward_ios,
+                                            color: GoloColors.secondary1,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              /*Container(
+                                margin: EdgeInsets.only(top: 25),
+                                color: GoloColors.secondary1.withAlpha(15),
+                                child: Container(
+                                  margin: EdgeInsets.all(25),
+                                  child: PlaceDetailReview(
+                                    place: place,
+                                    reviews: bloc.reviews,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                height: 10,
+                              ),*/
                             ],
                           ),
                         ),
-                        _buildHeader(place)
+                        /*Container(
+                                height: 80,
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.only(bottom: 15),
+                                child: Container(
+                                  height: 45,
+                                  width: 300,
+                                  decoration: BoxDecoration(
+                                    color: GoloColors.primary,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(25),
+                                    ),
+                                  ),
+                                  child: FlatButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text(
+                                      "Book",
+                                      style: TextStyle(
+                                          fontFamily: GoloFont,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),*/
                       ],
-                    ));
-              })),
+                    ),
+                  ),
+                  _buildHeader(place, context),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
   // ### HEADER
-  Widget _buildHeader(Place place) {
+  Widget _buildHeader(Place place, BuildContext context) {
     return Container(
-        height: 85,
-        color: _headerBackgroundColor,
-        child: SafeArea(
-            bottom: false,
-            child: Container(
-              color: _headerBackgroundColor,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  CupertinoButton(
-                    child: Icon(DenLineIcons.angle_left,
-                        size: 22, color: Colors.white),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  Text(
-                    place != null ? (place.name ?? "") : "",
-                    style: TextStyle(
-                        fontFamily: GoloFont, fontSize: 24, color: _titleColor),
-                  ),
-                  CupertinoButton(
-                    child: Icon(DenLineIcons.bookmark,
-                        size: 24, color: Colors.white),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  )
-                ],
+      height: 95,
+      color: _headerBackgroundColor,
+      child: SafeArea(
+        bottom: false,
+        child: Container(
+          color: _headerBackgroundColor,
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              CupertinoButton(
+                child: Icon(DenLineIcons.angle_left,
+                    size: 22, color: Colors.white),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
-            )));
+              Expanded(
+                child: Text(
+                  place != null ? (place.name ?? "") : "",
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: GoloFont,
+                    fontSize: 24,
+                    color: _titleColor,
+                  ),
+                ),
+              ),
+              CupertinoButton(
+                child: Icon(
+                  DenLineIcons.bookmark,
+                  size: 24,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  widget.place.addRemoveToWishList(message: (message) {
+                    showSnackBar(message, context);
+                  });
+                },
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // ### ACTIONS
@@ -364,7 +426,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
             margin: EdgeInsets.only(left: 25),
             alignment: Alignment.topLeft,
             child: Text(
-              "Maps View",
+              "Map View",
               style: TextStyle(
                   fontFamily: GoloFont,
                   fontSize: 17,
@@ -378,15 +440,16 @@ class _PlaceDetailState extends State<PlaceDetail> {
                 _openMap(place);
               },
               child: Container(
-                  margin: EdgeInsets.only(top: 10),
-                  child: AbsorbPointer(
-                    child: GoogleMapViewPlace(
-                      isFullScreen: false,
-                      zoom: 14,
-                      place: place,
-                    ),
-                    absorbing: true,
-                  )),
+                margin: EdgeInsets.only(top: 10),
+                child: AbsorbPointer(
+                  child: GoogleMapViewPlace(
+                    isFullScreen: false,
+                    zoom: 14,
+                    place: place,
+                  ),
+                  absorbing: true,
+                ),
+              ),
             ),
           )
         ],

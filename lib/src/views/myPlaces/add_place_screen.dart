@@ -414,14 +414,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           future: _future,
           builder: (fbCtx, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: Text(
-                  'Please wait...',
-                  style: TextStyle(
-                    fontSize: 22.0,
-                    fontFamily: GoloFont,
-                  ),
-                ),
+              return getCenterInfoWidget(
+                message: 'Please wait...',
               );
             }
             if (snapshot.hasError) {

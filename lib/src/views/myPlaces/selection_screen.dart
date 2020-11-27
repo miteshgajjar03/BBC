@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/modules/state/AppState.dart';
@@ -139,15 +140,8 @@ class _SelectionScreenState extends State<SelectionScreen> {
           future: _future,
           builder: (ctx, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: Text(
-                  'Fetching data please wait...',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22.0,
-                    fontFamily: GoloFont,
-                  ),
-                ),
+              return getCenterInfoWidget(
+                message: 'Fetching data please wait...',
               );
             }
             if (snapshot.connectionState == ConnectionState.done) {

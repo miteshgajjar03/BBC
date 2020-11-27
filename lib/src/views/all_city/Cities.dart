@@ -51,10 +51,6 @@ class _CitiesState extends State<Cities> {
 
   // ### City list
   Widget _buildCityGridView() => new GridView.count(
-        // padding: EdgeInsets.only(
-        //   top: 5,
-        //   bottom: 5,
-        // ),
         crossAxisCount: 2,
         childAspectRatio: 0.815, //715,
         children: List.generate(

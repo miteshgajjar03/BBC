@@ -220,9 +220,7 @@ class AccountScreenState extends State<AccountScreen> {
                                   textColor: Colors.white,
                                   color: GoloColors.primary,
                                   shape: StadiumBorder(),
-                                  onPressed: () {
-                                    HomeNav(context: context).openReviewList();
-                                  },
+                                  onPressed: () {},
                                   child: Text(
                                     "WishList",
                                     style: TextStyle(

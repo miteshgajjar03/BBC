@@ -4,6 +4,7 @@ import 'package:den_lineicons/den_lineicons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/localization/Localized.dart';
 import 'package:getgolo/localization/LocalizedKey.dart';
 import 'package:getgolo/modules/controls/images/MyImageHelper.dart';
@@ -59,7 +60,7 @@ class _CityDetailState extends State<CityDetail> {
       ..addListener(() {
         var offset = _scrollController.offset;
         // Header background color
-        var alpha = offset > 0 ? min(255, offset.toInt()) : 0;
+        var alpha = offset > 0 ? min(64, offset.toInt()) : 0;
         _headerBackgroundColor = GoloColors.primary.withAlpha(alpha);
         // Title color
         _titleColor = Colors.white.withAlpha(offset > 255 ? 255 : 0);
@@ -74,13 +75,24 @@ class _CityDetailState extends State<CityDetail> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<CityDetailBloc>(
-        bloc: bloc,
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          body: StreamBuilder(
-            stream: bloc.categoriesStream,
-            builder: (context, snapshot) {
-              print("===============> received stream event");
+      bloc: bloc,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: StreamBuilder(
+          stream: bloc.categoriesStream,
+          builder: (context, snapshot) {
+            print(
+              "===============> received stream event from city details",
+            );
+            print('CONNECTION STATE :: \(${snapshot.connectionState})');
+            print('HAS DATA :: \(${snapshot.hasData})');
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return getCenterInfoWidget(
+                message: 'Please wait\nFetching city details',
+              );
+            }
+            if (snapshot.hasData) {
               return AnnotatedRegion<SystemUiOverlayStyle>(
                 value: SystemUiOverlayStyle.dark,
                 child: Stack(
@@ -195,65 +207,65 @@ class _CityDetailState extends State<CityDetail> {
                                   decoration: BoxDecoration(
                                       color: Color.fromRGBO(249, 249, 249, 1)),
                                   child: Container(
-                                      margin: EdgeInsets.only(
-                                          left: 25, top: 20, bottom: 5),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Container(
-                                            alignment: Alignment.centerLeft,
-                                            child: Text(
-                                                Localized.of(context).trans(
-                                                        LocalizedKey
-                                                            .cityInfomation) ??
-                                                    "",
-                                                style: TextStyle(
-                                                  fontFamily: GoloFont,
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: GoloColors.secondary1,
-                                                )),
-                                          ),
-                                          Container(
-                                            alignment: Alignment.centerLeft,
-                                            margin: EdgeInsets.only(top: 10),
-                                            child: Text(
-                                              widget.city.description ?? "",
+                                    margin: EdgeInsets.only(
+                                        left: 25, top: 20, bottom: 5),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                              Localized.of(context).trans(
+                                                      LocalizedKey
+                                                          .cityInfomation) ??
+                                                  "",
                                               style: TextStyle(
                                                 fontFamily: GoloFont,
-                                                fontSize: 16,
-                                                color: GoloColors.secondary2,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w500,
+                                                color: GoloColors.secondary1,
+                                              )),
+                                        ),
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          margin: EdgeInsets.only(top: 10),
+                                          child: Text(
+                                            widget.city.description ?? "",
+                                            style: TextStyle(
+                                              fontFamily: GoloFont,
+                                              fontSize: 16,
+                                              color: GoloColors.secondary2,
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: CupertinoButton(
+                                            onPressed: () {
+                                              openFullCityDescription(context);
+                                            },
+                                            padding: EdgeInsets.all(0),
+                                            child: Text(
+                                              Localized.of(context).trans(
+                                                      LocalizedKey.readMore) ??
+                                                  "",
+                                              style: TextStyle(
+                                                fontFamily: GoloFont,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
+                                                color: GoloColors.primary,
                                               ),
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
-                                          Container(
-                                            alignment: Alignment.centerLeft,
-                                            child: CupertinoButton(
-                                              onPressed: () {
-                                                openFullCityDescription(
-                                                    context);
-                                              },
-                                              padding: EdgeInsets.all(0),
-                                              child: Text(
-                                                  Localized.of(context).trans(
-                                                          LocalizedKey
-                                                              .readMore) ??
-                                                      "",
-                                                  style: TextStyle(
-                                                    fontFamily: GoloFont,
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: GoloColors.primary,
-                                                  )),
-                                            ),
-                                          )
-                                        ],
-                                      )),
+                                        )
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               )
                             ],
@@ -265,15 +277,18 @@ class _CityDetailState extends State<CityDetail> {
                   ],
                 ),
               );
-            },
-          ),
-        ));
+            }
+            return Container();
+          },
+        ),
+      ),
+    );
   }
 
   // ### HEADER
   Widget _buildHeader() {
     return Container(
-      height: 85,
+      height: 95,
       color: _headerBackgroundColor,
       child: SafeArea(
         bottom: false,
@@ -285,6 +300,7 @@ class _CityDetailState extends State<CityDetail> {
                 alignment: Alignment.center,
                 child: Text(
                   widget.city.name ?? "",
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: GoloFont,
                     fontSize: 24,

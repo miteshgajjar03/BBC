@@ -58,13 +58,19 @@ class _GoogleMapView extends State<GoogleMapViewCity> {
       GoogleMap(
         padding: EdgeInsets.all(0),
         initialCameraPosition: CameraPosition(
-            target: LatLng(widget.city.lat, widget.city.lng), zoom: 15),
+          target: LatLng(widget.city.lat, widget.city.lng),
+          zoom: 15,
+        ),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
           controller.setMapStyle(MyMapStyle.normalMap);
           final cameraPosition = CameraPosition(
-              target: LatLng(widget.city.lat, widget.city.lng),
-              zoom: widget.zoom);
+            target: LatLng(
+              widget.city.lat,
+              widget.city.lng,
+            ),
+            zoom: widget.zoom,
+          );
           controller.moveCamera(CameraUpdate.newCameraPosition(cameraPosition));
           setState(() {});
         },
@@ -176,28 +182,30 @@ class _GoogleMapView extends State<GoogleMapViewCity> {
 
   void getMarkers(BuildContext context) {
     this.markers.clear();
-    List.generate(widget.categories != null ? widget.categories.length : 0,
-        (index) {
-      String imageString;
-      switch (widget.categories[index].id) {
-        case 11:
-          imageString = 'assets/iconGolo/icon-see@3x.png';
-          break;
-        case 12:
-          imageString = 'assets/iconGolo/icon-eat-drink@3x.png';
-          break;
-        case 13:
-          imageString = 'assets/iconGolo/icon-stay@3x.png';
-          break;
-        case 21:
-          imageString = 'assets/iconGolo/icon-shop@3x.png';
-          break;
-        default:
-          imageString = 'assets/iconGolo/icon-shop@3x.png';
-      }
-      widget.categories[index].places.forEach((place) async {
-        var latlng = LatLng(place.lat, place.lng);
-        if (latlng != null) {
+    List.generate(
+      widget.categories != null ? widget.categories.length : 0,
+      (index) {
+        String imageString;
+        switch (widget.categories[index].id) {
+          case 11:
+            imageString = 'assets/iconGolo/icon-see@3x.png';
+            break;
+          case 12:
+            imageString = 'assets/iconGolo/icon-eat-drink@3x.png';
+            break;
+          case 13:
+            imageString = 'assets/iconGolo/icon-stay@3x.png';
+            break;
+          case 21:
+            imageString = 'assets/iconGolo/icon-shop@3x.png';
+            break;
+          default:
+            imageString = 'assets/iconGolo/icon-shop@3x.png';
+        }
+        widget.categories[index].places.forEach(
+          (place) async {
+            if (place.lat != null && place.lng != null) {
+              var latlng = LatLng(place.lat, place.lng);
 //          final Uint8List markerIcon = await getBytesFromAsset(imageString, 100);
 //          final marker = Marker(
 //            position: latlng,
@@ -214,28 +222,30 @@ class _GoogleMapView extends State<GoogleMapViewCity> {
 //            },
 //          );
 //          markers.add(marker);
-          BitmapDescriptor.fromAssetImage(
-                  ImageConfiguration(size: Size(60, 60)), imageString)
-              .then((value) {
-            final marker = Marker(
-              position: latlng,
-              markerId: MarkerId("${place.id}"),
-              icon: value,
-              onTap: () {
-                if (widget.isFullScreen) {
-                  setState(() {
-                    placeToShow = place;
-                    isShowedPlace = true;
-                    categoryToShow = widget.categories[index];
-                  });
-                }
-              },
-            );
-            markers.add(marker);
-          });
-        }
-      });
-    });
+              BitmapDescriptor.fromAssetImage(
+                      ImageConfiguration(size: Size(60, 60)), imageString)
+                  .then((value) {
+                final marker = Marker(
+                  position: latlng,
+                  markerId: MarkerId("${place.id}"),
+                  icon: value,
+                  onTap: () {
+                    if (widget.isFullScreen) {
+                      setState(() {
+                        placeToShow = place;
+                        isShowedPlace = true;
+                        categoryToShow = widget.categories[index];
+                      });
+                    }
+                  },
+                );
+                markers.add(marker);
+              });
+            }
+          },
+        );
+      },
+    );
   }
 
 //  Future<Uint8List> getBytesFromAsset(String path, int width) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/entity/Place.dart';
+import 'package:getgolo/src/entity/Review.dart';
 import 'package:getgolo/src/views/citydetail/CityDetail.dart';
 import 'package:getgolo/src/views/myPlaces/add_place_screen.dart';
 import 'package:getgolo/src/views/place_detail/PlaceDetail.dart';
@@ -101,24 +102,34 @@ class HomeNav {
     );
   }
 
-  void openReviewList() {
+  void openReviewList({
+    @required List<Review> review,
+    @required int placeID,
+  }) {
     Navigator.of(_context, rootNavigator: true).push(
       PageRouteBuilder(
         opaque: true,
         pageBuilder: (BuildContext context, _, __) {
-          return ReviewListScreen();
+          return ReviewListScreen(
+            reviews: review,
+            placeID: placeID,
+          );
         },
         fullscreenDialog: true,
       ),
     );
   }
 
-  void openWriteReview() {
+  void openWriteReview({
+    @required int placeID,
+  }) {
     Navigator.of(_context, rootNavigator: true).push(
       PageRouteBuilder(
         opaque: true,
         pageBuilder: (BuildContext context, _, __) {
-          return AddReviewScreen();
+          return AddReviewScreen(
+            placeID: placeID,
+          );
         },
         fullscreenDialog: true,
       ),

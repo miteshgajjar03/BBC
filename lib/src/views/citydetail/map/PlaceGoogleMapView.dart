@@ -168,10 +168,14 @@ class _GoogleMapView extends State<GoogleMapViewPlace> {
         imageString = '';
     }
 
-    if (imageString != null && imageString.isNotEmpty) {
+    if (imageString != null &&
+        imageString.isNotEmpty &&
+        place.lat != null &&
+        place.lng != null) {
       BitmapDescriptor.fromAssetImage(
-              ImageConfiguration(devicePixelRatio: 0.75), imageString)
-          .then((value) {
+        ImageConfiguration(devicePixelRatio: 0.75),
+        imageString,
+      ).then((value) {
         final marker = Marker(
           position: LatLng(place.lat, place.lng),
           markerId: MarkerId("${place.id}"),

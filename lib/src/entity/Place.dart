@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:getgolo/modules/services/http/Api.dart';
+import 'package:getgolo/modules/services/platform/Platform.dart';
 import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/entity/Review.dart';
 import 'package:getgolo/modules/services/platform/lara/lara.dart';
@@ -39,6 +44,10 @@ class Place extends Base {
   String _rate;
   String get rate {
     return hasRate ? _rate : "(No review)";
+  }
+
+  double get doubleRate {
+    return hasRate ? double.parse(_rate) : 0;
   }
 
   bool get hasRate {
@@ -200,5 +209,24 @@ class Place extends Base {
 
   void setReviewCount(int count) {
     reviewCount = count;
+  }
+
+  //
+  // ADD TO WISH LIST
+  //
+  addRemoveToWishList({@required Function(String) message}) async {
+    Map<String, dynamic> dict = {};
+    dict['place_id'] = this.id.toString();
+    final api = Platform().shared.baseUrl + "app/users/wishlist";
+    final response = await Api.requestPost(api, null, dict);
+
+    String messageString = '';
+    try {
+      final res = json.decode(response.json) as Map<String, dynamic>;
+      messageString = res['message'] as String ?? '';
+    } catch (error) {
+      messageString = error.toString();
+    }
+    message(messageString);
   }
 }
