@@ -35,8 +35,12 @@ class ApiAuth {
     } else {
       final res = json.decode(response.json) as Map<String, dynamic>;
       final token = res['token'];
+      final tokenType = res['token_type'];
       if (token != null) {
-        final isSuccess = await _storeTokenInPreference(token: token);
+        final isSuccess = await _storeTokenInPreference(
+          token: token,
+          tokenType: tokenType,
+        );
         return AuthResponseHandler(
           isSuccess: isSuccess,
           message: '',
@@ -175,10 +179,13 @@ class ApiAuth {
   //
   // Store User Data
   //
-  static Future<bool> _storeTokenInPreference({@required String token}) async {
+  static Future<bool> _storeTokenInPreference({
+    @required String token,
+    @required String tokenType,
+  }) async {
     if (token != null) {
       final pref = await SharedPreferences.getInstance();
-      final authToken = 'Bearer $token';
+      final authToken = '$tokenType $token';
       final isSuccess = pref.setString('token', authToken);
       UserManager.shared.authToken = authToken;
       return isSuccess;
