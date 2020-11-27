@@ -197,21 +197,21 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       showSnackBar('Please enter valid email id', ctx);
     } else {
       Map<String, dynamic> requestDict = {};
-      requestDict['name'] = _placeNameController.text.trim();
-      requestDict['slug'] = _placeNameController.text.trim();
-      requestDict['description'] = _descriptionController.text.trim();
+      requestDict['name'] = _placeNameController.text;
+      requestDict['slug'] = _placeNameController.text;
+      requestDict['description'] = _descriptionController.text;
       requestDict['category'] =
           _selectedCategory.map((e) => e.id).toList().toString();
       requestDict['place_type'] = [123].toString();
 
       requestDict['country_id'] = _selectedCountry.id;
       requestDict['city_id'] = _selectedCity.id;
-      requestDict['address'] = _addressController.text.trim();
+      requestDict['address'] = _addressController.text;
 
-      if (_priceRangeController.text.trim().contains('\$')) {
+      if (_priceRangeController.text.contains('\$')) {
         requestDict['price_range'] = _priceRangeController.text.length;
       } else {
-        requestDict['price_range'] = _priceRangeController.text.trim();
+        requestDict['price_range'] = _priceRangeController.text;
       }
 
       final selectedAmenityIDs = objInitialData.arrAmenity
@@ -223,16 +223,16 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       requestDict['lat'] = _selectedCity.latitude;
       requestDict['lng'] = _selectedCity.longitude;
 
-      requestDict['email'] = _emailController.text.trim();
-      requestDict['phone_number'] = _phoneController.text.trim();
-      requestDict['website'] = _websiteController.text.trim();
+      requestDict['email'] = _emailController.text;
+      requestDict['phone_number'] = _phoneController.text;
+      requestDict['website'] = _websiteController.text;
 
       List<Map<String, dynamic>> social = [];
       _arrSocialNetwork.forEach((element) {
-        if (element.urlController.text.trim().length > 0) {
+        if (element.urlController.text.length > 0) {
           Map<String, dynamic> dictSocial = {};
-          dictSocial['name'] = element.networkController.text.trim();
-          dictSocial['url'] = element.urlController.text.trim();
+          dictSocial['name'] = element.networkController.text;
+          dictSocial['url'] = element.urlController.text;
           social.add(dictSocial);
         }
       });
@@ -240,10 +240,10 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
 
       List<Map<String, dynamic>> opening = [];
       _openingHours.forEach((element) {
-        if (element.valueController.text.trim().length > 0) {
+        if (element.valueController.text.length > 0) {
           Map<String, dynamic> dictHour = {};
-          dictHour['title'] = element.title.trim();
-          dictHour['value'] = element.valueController.text.trim();
+          dictHour['title'] = element.title;
+          dictHour['value'] = element.valueController.text;
           opening.add(dictHour);
         }
       });

@@ -35,11 +35,18 @@ class ApiAuth {
     } else {
       final res = json.decode(response.json) as Map<String, dynamic>;
       final token = res['token'];
-      final isSuccess = await _storeTokenInPreference(token: token);
-      return AuthResponseHandler(
-        isSuccess: isSuccess,
-        message: '',
-      );
+      if (token != null) {
+        final isSuccess = await _storeTokenInPreference(token: token);
+        return AuthResponseHandler(
+          isSuccess: isSuccess,
+          message: '',
+        );
+      } else {
+        return AuthResponseHandler(
+          isSuccess: false,
+          message: res['message'] ?? 'Unauthorized',
+        );
+      }
     }
   }
 
