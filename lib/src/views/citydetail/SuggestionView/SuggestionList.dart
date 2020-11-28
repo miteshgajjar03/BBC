@@ -98,27 +98,33 @@ class _Sugestion extends State<SuggestionList> {
   }
 
   Widget _sugestionTable() => new ListView.builder(
-      itemCount: widget.places != null ? widget.places.length : 0,
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.only(left: 25),
-      itemBuilder: (BuildContext context, int index) => _buildSuggestionCell(
+        itemCount: widget.places != null ? widget.places.length : 0,
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.only(left: 12),
+        itemBuilder: (BuildContext context, int index) {
+          return _buildSuggestionCell(
             context,
             index,
-          ));
-
-  Widget _buildSuggestionCell(BuildContext context, int index) =>
-      GestureDetector(
-        onTap: () {
-          widget.handleOpenPlace(widget.places[index]);
+          );
         },
+      );
+
+  Widget _buildSuggestionCell(BuildContext context, int index) {
+    return GestureDetector(
+      onTap: () {
+        widget.handleOpenPlace(
+          widget.places[index],
+        );
+      },
+      child: Container(
         child: Container(
-          child: Container(
-            margin: EdgeInsets.only(right: 10),
-            width: 180,
-            child: SuggestionCell(
-              place: widget.places[index],
-            ),
+          margin: EdgeInsets.only(right: 10),
+          width: 180,
+          child: SuggestionCell(
+            place: widget.places[index],
           ),
         ),
-      );
+      ),
+    );
+  }
 }

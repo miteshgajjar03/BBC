@@ -1,3 +1,5 @@
+import 'package:getgolo/src/entity/PlaceType.dart';
+
 import 'Base.dart';
 
 class Category extends Base {
@@ -16,6 +18,7 @@ class Category extends Base {
   String createdAt;
   String updatedAt;
   bool isSelected = false;
+  List<PlaceType> placeTypes = [];
 
   Category(Map<String, dynamic> json) : super(json) {
     name = json["name"];
@@ -31,6 +34,20 @@ class Category extends Base {
     seoDescription = json["seo_description"];
     createdAt = json["created_at"];
     updatedAt = json["updated_at"];
+
+    List<PlaceType> types = [];
+    if (json['place_type'] is List<dynamic>) {
+      final arrDict = json['place_type'] as List<dynamic>;
+      types = List<PlaceType>.generate(
+        arrDict.length,
+        (index) {
+          return PlaceType.fromJson(
+            (json['place_type'])[index],
+          );
+        },
+      );
+    }
+    placeTypes = types;
   }
 
   factory Category.fromJson(Map<String, dynamic> json) {

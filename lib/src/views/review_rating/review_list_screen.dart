@@ -9,7 +9,6 @@ import 'package:getgolo/src/entity/Review.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 
 class ReviewListScreen extends StatefulWidget {
-  @override
   final List<Review> reviews;
   final int placeID;
   _ReviewListScreenState createState() => _ReviewListScreenState();

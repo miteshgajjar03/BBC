@@ -42,7 +42,10 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
         ctx,
       );
     } else {
-      final progress = ProgressDialog(ctx);
+      final progress = ProgressDialog(
+        ctx,
+        isDismissible: false,
+      );
       await progress.show();
 
       Map<String, dynamic> dict = {};

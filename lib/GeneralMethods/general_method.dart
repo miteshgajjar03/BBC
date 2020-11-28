@@ -4,7 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 
-final GOOGLE_API_KEY = 'AIzaSyAoUCsCGYIEP8aFtfETPDbPZOywkLZxbHo';
+final googleApiKey =
+    'AIzaSyCY8y_pWZbccq0ecZQHwJKs40Y5X1kfY8I'; //'AIzaSyAoUCsCGYIEP8aFtfETPDbPZOywkLZxbHo';
 
 showConfirmationAlert({
   @required BuildContext context,
@@ -252,7 +253,7 @@ String getMapURLFrom({
   if (latitude == null || longitude == null) {
     return '';
   }
-  return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude,$longitude&radius=1500&key=$GOOGLE_API_KEY";
+  return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude,$longitude&radius=1500&key=$googleApiKey";
 }
 
 Widget getCenterInfoWidget({

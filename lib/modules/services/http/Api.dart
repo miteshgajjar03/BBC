@@ -15,19 +15,46 @@ class ResponseData {
   );
 }
 
-enum RequestType { Get, Post }
+enum RequestType { Get, Post, Delete }
 
 class Api {
+  // DELETE
+  static Future<ResponseData> requestDelete(
+    String api,
+    Map<String, dynamic> query,
+  ) {
+    return _request(
+      RequestType.Delete,
+      _makeUrl(api, query),
+      body: null,
+    );
+  }
+
   // POST
   static Future<ResponseData> requestPost(
-      String api, Map<String, dynamic> query, Map<String, dynamic> body) {
-    return _request(RequestType.Post, _makeUrl(api, query), body: body);
+    String api,
+    Map<String, dynamic> query,
+    Map<String, dynamic> body,
+  ) {
+    return _request(
+      RequestType.Post,
+      _makeUrl(api, query),
+      body: body,
+    );
   }
 
   // GET
-  static Future<ResponseData> requestGet(String api,
-      {Map<String, String> query}) async {
-    return await _request(RequestType.Get, _makeUrl(api, query));
+  static Future<ResponseData> requestGet(
+    String api, {
+    Map<String, String> query,
+  }) async {
+    return await _request(
+      RequestType.Get,
+      _makeUrl(
+        api,
+        query,
+      ),
+    );
   }
 
   static Future<ResponseData> requestGetPaging(
@@ -47,7 +74,11 @@ class Api {
     String imageFieldName,
     Map<String, dynamic> query,
   ) {
-    return _uploadImage(_makeUrl(api, query), imageFile, imageFieldName);
+    return _uploadImage(
+      _makeUrl(api, query),
+      imageFile,
+      imageFieldName,
+    );
   }
 
   //
@@ -58,6 +89,7 @@ class Api {
     if (UserManager.shared.authToken.isNotEmpty) {
       headerDict['Authorization'] = UserManager.shared.authToken;
     }
+    headerDict['Content-Type'] = 'application/json';
     return headerDict;
   }
 
@@ -76,7 +108,13 @@ class Api {
       case RequestType.Post:
         response = await post(
           url,
-          body: body,
+          body: json.encode(body),
+          headers: _getHeader(),
+        );
+        break;
+      case RequestType.Delete:
+        response = await delete(
+          url,
           headers: _getHeader(),
         );
         break;
@@ -103,11 +141,20 @@ class Api {
     print('UPLOAD IMAGE URL :: $postUri');
     MultipartRequest request = MultipartRequest("POST", postUri);
     request.headers.addAll(_getHeader());
+
+    // Map<String, String> map = {};
+    // query.forEach((key, value) {
+    //   map[key] = '$value';
+    // });
+    // print('MAP :: $map');
+    // request.fields.addAll(map);
+
+    print('FILE NAME :: ${imageFile.path.split('/').last.split('-').last}');
     if (imageFile != null) {
       MultipartFile multipartFile = await MultipartFile.fromPath(
         imageFieldName,
         imageFile.path,
-        filename: 'profile_image.png',
+        filename: imageFile.path.split('/').last,
       );
 
       request.files.add(multipartFile);
@@ -138,7 +185,9 @@ class Api {
     List<dynamic> params = [];
     if (query != null) {
       query.forEach((key, value) {
-        params.add(key + "=" + value.toString());
+        params.add(
+          key + '=' + value.toString(),
+        );
       });
     } else {
       return api;

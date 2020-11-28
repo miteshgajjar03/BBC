@@ -14,6 +14,7 @@ class LocalizedKey {
   static const String filter = "Filter";
   static const String browsBusinessByCategory = "Browse Businesses by Category";
   static const String myPlaces = "My Places";
+  static const String myWishlist = "My Wishlist";
   static const String reviews = "Reviews";
   static const String writeReview = "Write Review";
   static const String addPlace = "Add Place";

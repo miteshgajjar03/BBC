@@ -105,7 +105,7 @@ class _DashboardTabsState extends State<DashboardTabs> {
         cities: AppState().cities,
       ),
       MyPlacesScreen(
-        cities: AppState().cities,
+        listType: PlaceListType.wishList,
       ),
       UserManager.shared.authToken.isEmpty ? LogInPage() : AccountScreen(),
     ];

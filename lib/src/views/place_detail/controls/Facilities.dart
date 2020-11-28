@@ -34,24 +34,34 @@ class _FacilitiesViewState extends State<FacilitiesView> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Expanded(
-                  child: SvgPicture.network(
-                    widget.amenities[index].iconUrl,
-                    fit: BoxFit.contain,
-                    width: 25,
-                    height: 25,
-                    placeholderBuilder: (BuildContext context) => Container(
-                        padding: const EdgeInsets.all(30.0),
-                        child: const CircularProgressIndicator()),
-                  ),
+                  child: widget.amenities[index].isSVG
+                      ? SvgPicture.network(
+                          widget.amenities[index].iconUrl,
+                          fit: BoxFit.contain,
+                          width: 25,
+                          height: 25,
+                          placeholderBuilder: (BuildContext context) =>
+                              Container(
+                            padding: const EdgeInsets.all(30.0),
+                            child: const CircularProgressIndicator(),
+                          ),
+                        )
+                      : Image.network(
+                          widget.amenities[index].iconUrl,
+                          height: 30,
+                          width: 30,
+                          fit: BoxFit.contain,
+                        ),
                 ),
                 Container(
                   height: 40,
                   child: Text(
                     widget.amenities[index].name ?? "",
                     style: TextStyle(
-                        fontFamily: GoloFont,
-                        fontSize: 15,
-                        color: GoloColors.secondary2),
+                      fontFamily: GoloFont,
+                      fontSize: 15,
+                      color: GoloColors.secondary2,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

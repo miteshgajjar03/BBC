@@ -13,6 +13,7 @@ import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/entity/Amenity.dart';
 import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/PlaceInitialData.dart';
+import 'package:getgolo/src/entity/PlaceType.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 import 'package:getgolo/src/views/myPlaces/selection_screen.dart';
 import 'package:image_picker/image_picker.dart';
@@ -73,7 +74,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   Country _selectedCountry;
   City _selectedCity;
   List<Category> _selectedCategory = [];
-  List<int> _selectedPlaceType = [];
+  List<PlaceType> _selectedPlaceType = [];
 
   // Text Editing Controllers
   TextEditingController _placeNameController = TextEditingController();
@@ -184,7 +185,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       showSnackBar('Please enter description about your place', ctx);
     } else if (_selectedCategory.length == 0) {
       showSnackBar('Please select category of your place', ctx);
-    } else if (_selectedPlaceType.length != 0) {
+    } else if (_selectedPlaceType.length == 0) {
       showSnackBar('Please select your place type', ctx);
     } else if (_selectedCountry == null || _selectedCountry.id == 0) {
       showSnackBar('Please select country', ctx);
@@ -200,9 +201,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       requestDict['name'] = _placeNameController.text;
       requestDict['slug'] = _placeNameController.text;
       requestDict['description'] = _descriptionController.text;
-      requestDict['category'] =
-          _selectedCategory.map((e) => e.id).toList().toString();
-      requestDict['place_type'] = [123].toString();
+      requestDict['category'] = _selectedCategory.map((e) => e.id).toList();
+      requestDict['place_type'] = _selectedPlaceType.map((e) => e.id).toList();
 
       requestDict['country_id'] = _selectedCountry.id;
       requestDict['city_id'] = _selectedCity.id;
@@ -218,7 +218,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           .where((amenity) => amenity.isSelected)
           .map((e) => e.id)
           .toList();
-      requestDict['amenities'] = selectedAmenityIDs.toString();
+      requestDict['amenities'] = selectedAmenityIDs;
 
       requestDict['lat'] = _selectedCity.latitude;
       requestDict['lng'] = _selectedCity.longitude;
@@ -280,7 +280,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             Future.delayed(Duration(seconds: 2)).then(
               (value) {
                 _resetCategorySelection();
-                Navigator.of(ctx).pop();
+                //Navigator.of(ctx).pop();
               },
             );
           }
@@ -290,7 +290,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       }
 
       if (!progress.isShowing()) {
-        await progress.show();
+        //await progress.show();
       }
       if (_thumbImage != null) {
         print('REQUEST DICT WITH THUMB :: $requestDict');
@@ -306,8 +306,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         requestDict['thumb'] = '';
         final res = await Api.requestPost(
           api,
-          requestDict,
           null,
+          requestDict,
         );
         parseResponse(response: res);
       }
@@ -548,6 +548,26 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                           hintText: 'Select Place Type in Your Category',
                           validator: (text) {},
                           onSaved: (text) {},
+                          isReadOnly: true,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (ctx) {
+                                  return SelectionScreen(
+                                    selectionType: SelectionType.placeType,
+                                    objInitialData: objInitialData,
+                                    onSelectValue: (arrSelected) {
+                                      _setPlaceTypeSelected(
+                                        arrSelected: arrSelected,
+                                      );
+                                    },
+                                  );
+                                },
+                                fullscreenDialog: true,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -1318,14 +1338,14 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   _setSelectedCategory({
     @required List<SelectionData> arrSelected,
   }) {
-    AppState().categories.forEach((element) {
+    objInitialData.categories.forEach((element) {
       element.isSelected = false;
     });
 
     arrSelected.forEach(
       (element) {
         final category =
-            AppState().categories.firstWhere((ele) => ele.id == element.id);
+            objInitialData.categories.firstWhere((ele) => ele.id == element.id);
         if (category != null) {
           category.isSelected = true;
         }
@@ -1333,9 +1353,61 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     );
 
     final selectedCat =
-        AppState().categories.where((e) => e.isSelected).toList();
+        objInitialData.categories.where((e) => e.isSelected).toList();
     _selectedCategory = selectedCat;
     _categoryController.text = _selectedCategory.map((e) => e.name).join(', ');
+
+    objInitialData.categories.forEach((category) {
+      category.placeTypes.forEach((place) {
+        place.isSelected = false;
+      });
+    });
+    _selectedPlaceType.clear();
+    _placeTypeController.text = '';
+  }
+
+  _setPlaceTypeSelected({
+    @required List<SelectionData> arrSelected,
+  }) {
+    objInitialData.categories.forEach((category) {
+      category.placeTypes.forEach((place) {
+        place.isSelected = false;
+      });
+    });
+
+    List<PlaceType> selectedPlaces = [];
+    print('## Selected Name :: ${arrSelected.map((e) => e.name)}');
+    arrSelected.forEach(
+      (element) {
+        objInitialData.categories.forEach(
+          (category) {
+            if (category.isSelected && category.placeTypes.length > 0) {
+              final arrSelPlace = category.placeTypes
+                  .where(
+                    (plc) => plc.id == element.id,
+                  )
+                  .toList();
+              if (arrSelPlace.length > 0) {
+                arrSelPlace.forEach(
+                  (selPlace) {
+                    selectedPlaces.add(selPlace);
+                    selPlace.isSelected = true;
+                  },
+                );
+              }
+            }
+          },
+        );
+      },
+    );
+
+    final selectedPlace = selectedPlaces.where((e) => e.isSelected).toList();
+    _selectedPlaceType = selectedPlace;
+    _placeTypeController.text = _selectedPlaceType
+        .map(
+          (e) => e.name,
+        )
+        .join(', ');
   }
 
   //

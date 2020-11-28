@@ -60,7 +60,7 @@ class _CityDetailState extends State<CityDetail> {
       ..addListener(() {
         var offset = _scrollController.offset;
         // Header background color
-        var alpha = offset > 0 ? min(64, offset.toInt()) : 0;
+        var alpha = offset > 0 ? min(255, offset.toInt()) : 0;
         _headerBackgroundColor = GoloColors.primary.withAlpha(alpha);
         // Title color
         _titleColor = Colors.white.withAlpha(offset > 255 ? 255 : 0);
@@ -81,12 +81,6 @@ class _CityDetailState extends State<CityDetail> {
         body: StreamBuilder(
           stream: bloc.categoriesStream,
           builder: (context, snapshot) {
-            print(
-              "===============> received stream event from city details",
-            );
-            print('CONNECTION STATE :: \(${snapshot.connectionState})');
-            print('HAS DATA :: \(${snapshot.hasData})');
-
             if (snapshot.connectionState == ConnectionState.waiting) {
               return getCenterInfoWidget(
                 message: 'Please wait\nFetching city details',
@@ -155,10 +149,11 @@ class _CityDetailState extends State<CityDetail> {
                                             child: Text(
                                               widget.city.intro ?? "",
                                               style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontFamily: GoloFont,
-                                                  fontStyle: FontStyle.italic,
-                                                  fontSize: 18),
+                                                color: Colors.white,
+                                                fontFamily: GoloFont,
+                                                fontStyle: FontStyle.italic,
+                                                fontSize: 18,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -177,16 +172,18 @@ class _CityDetailState extends State<CityDetail> {
                                   children: <Widget>[
                                     Container(child: _buildMap(bloc, false)),
                                     Container(
-                                        child: SizedBox.expand(
-                                            child: FlatButton(
-                                      child: null,
-                                      color: Colors.transparent,
-                                      splashColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onPressed: () {
-                                        _openMap(bloc);
-                                      },
-                                    )))
+                                      child: SizedBox.expand(
+                                        child: FlatButton(
+                                          child: null,
+                                          color: Colors.transparent,
+                                          splashColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onPressed: () {
+                                            _openMap(bloc);
+                                          },
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),

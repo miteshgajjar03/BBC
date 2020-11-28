@@ -1,10 +1,13 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/services/platform/Platform.dart';
+import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/entity/Review.dart';
 import 'package:getgolo/src/providers/request_services/query/PageQuery.dart';
 import 'package:getgolo/src/providers/request_services/response/ResponseListData.dart';
+import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 
 class PlaceProvider {
   static Future<ResponseListData> getFeature(String cityId, {PageQuery query}) {
@@ -43,5 +46,35 @@ class PlaceProvider {
       }
       return null;
     });
+  }
+
+  static Future<List<Place>> getPlace({
+    @required PlaceListType listType,
+  }) {
+    String url = '';
+    if (listType == PlaceListType.myPlace) {
+      url = Platform().shared.baseUrl + "app/users/place";
+    } else if (listType == PlaceListType.wishList) {
+      url = Platform().shared.baseUrl + "app/users/getWishlist";
+    }
+    return Api.requestGetPaging(url, null).then(
+      (response) {
+        final res = json.decode(response.json) as Map<String, dynamic>;
+        final dictData = res['data'] as Map<String, dynamic>;
+        List<dynamic> items = dictData['data'];
+
+        try {
+          if (items != null && items.length > 0) {
+            return List<Place>.generate(
+              items.length,
+              (i) => Place(items[i]),
+            );
+          }
+        } catch (error) {
+          print('ERROR WHILE FETCHING PLACE :: ${error.toString()}');
+        }
+        return null;
+      },
+    );
   }
 }

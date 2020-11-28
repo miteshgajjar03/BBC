@@ -1,9 +1,10 @@
 import 'Base.dart';
 
-class PlaceType extends Base{
-    int categoryId;
-    String description;    
-    String name;    
+class PlaceType extends Base {
+  int categoryId;
+  String description;
+  String name;
+  bool isSelected = false;
   PlaceType(Map<String, dynamic> json) : super(json) {
     categoryId = json["category_id"];
     description = json["description"];

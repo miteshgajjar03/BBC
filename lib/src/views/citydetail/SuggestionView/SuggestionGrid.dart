@@ -1,4 +1,3 @@
-import 'package:den_lineicons/den_lineicons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getgolo/src/entity/PlaceCategory.dart';
@@ -40,66 +39,71 @@ class _SuggestionGrid extends State<SuggestionGrid> {
       places = widget.places;
     }
     return Container(
-        margin: EdgeInsets.only(top: 20, left: 0, right: 0),
-        child: Column(
-          children: <Widget>[
-            //Category
-            Container(
-              height: 60,
-              margin: EdgeInsets.only(left: 25, right: 25),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    widget.category.featureTitle ?? "",
-                    style: TextStyle(
-                        fontFamily: GoloFont,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 20,
-                        color: GoloColors.secondary1),
+      margin: EdgeInsets.only(top: 20, left: 0, right: 0),
+      child: Column(
+        children: <Widget>[
+          //Category
+          Container(
+            height: 60,
+            margin: EdgeInsets.only(left: 25, right: 25),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  widget.category.featureTitle ?? "",
+                  style: TextStyle(
+                    fontFamily: GoloFont,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 20,
+                    color: GoloColors.secondary1,
                   ),
-                  CupertinoButton(
-                    onPressed: () {
-                      navigateToFilterView();
-                    },
-                    child: Stack(
-                      alignment: Alignment.centerRight,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(right: 5),
-                          child: Icon(DenLineIcons.filter,
-                              size: 20, color: GoloColors.secondary2),
+                ),
+                /*CupertinoButton(
+                  onPressed: () {
+                    navigateToFilterView();
+                  },
+                  child: Stack(
+                    alignment: Alignment.centerRight,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: Icon(
+                          DenLineIcons.filter,
+                          size: 20,
+                          color: GoloColors.secondary2,
                         ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Visibility(
-                            visible: selectedPriceOptions.isNotEmpty ||
-                                selectedAmenityOptions.isNotEmpty ||
-                                selectedTypesoptions.isNotEmpty,
-                            child: Container(
-                              padding: EdgeInsets.only(right: 0),
-                              height: 10,
-                              width: 10,
-                              decoration: BoxDecoration(
-                                color: GoloColors.primary,
-                                shape: BoxShape.circle,
-                              ),
+                      ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Visibility(
+                          visible: selectedPriceOptions.isNotEmpty ||
+                              selectedAmenityOptions.isNotEmpty ||
+                              selectedTypesoptions.isNotEmpty,
+                          child: Container(
+                            padding: EdgeInsets.only(right: 0),
+                            height: 10,
+                            width: 10,
+                            decoration: BoxDecoration(
+                              color: GoloColors.primary,
+                              shape: BoxShape.circle,
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),*/
+              ],
             ),
-            // Grid view
-
-            Container(
-                margin: EdgeInsets.only(left: 25, right: 25),
-                child: _buildSuggestionGridView()),
-          ],
-        ));
+          ),
+          // Grid view
+          Container(
+            margin: EdgeInsets.only(left: 12, right: 12),
+            child: _buildSuggestionGridView(),
+          ),
+        ],
+      ),
+    );
   }
 
 //GridView

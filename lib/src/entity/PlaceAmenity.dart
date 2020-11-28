@@ -1,4 +1,3 @@
-
 import 'package:getgolo/modules/services/platform/lara/lara.dart';
 
 import 'Base.dart';
@@ -6,16 +5,16 @@ import 'Base.dart';
 class PlaceAmenity extends Base {
   String name;
   String iconUrl;
+  bool isSVG;
 
-
-  PlaceAmenity(Map<String, dynamic> json) : super(json){
+  PlaceAmenity(Map<String, dynamic> json) : super(json) {
     name = json["name"];
     iconUrl = Lara.baseUrlImage + json["icon"];
+    String extension = iconUrl.split(".").last;
+    isSVG = (extension == 'svg');
   }
-  
 
   factory PlaceAmenity.fromJson(Map<String, dynamic> json) {
     return PlaceAmenity(json);
   }
-  
 }

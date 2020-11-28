@@ -14,9 +14,7 @@ import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/views/citydetail/map/PlaceGoogleMapView.dart';
 import 'package:getgolo/src/views/place_detail/controls/Contact.dart';
 import 'package:getgolo/src/views/place_detail/controls/Header.dart';
-import 'package:getgolo/src/views/place_detail/controls/Review.dart';
 import 'package:getgolo/src/views/place_detail_overview/PlaceDetailOverview.dart';
-import 'package:getgolo/src/views/review_rating/review_list_screen.dart';
 
 import 'controls/Facilities.dart';
 import 'controls/OpenTime.dart';
@@ -180,7 +178,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
                                     onTap: () {
                                       HomeNav(context: context).openReviewList(
                                         review: bloc.reviews,
-                                        placeID: bloc.place_id,
+                                        placeID: bloc.placeId,
                                       );
                                     },
                                     child: Container(
@@ -310,9 +308,11 @@ class _PlaceDetailState extends State<PlaceDetail> {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  widget.place.addRemoveToWishList(message: (message) {
-                    showSnackBar(message, context);
-                  });
+                  widget.place.addToWishList(
+                    message: (message) {
+                      showSnackBar(message, context);
+                    },
+                  );
                 },
               )
             ],
@@ -467,12 +467,15 @@ class _PlaceDetailState extends State<PlaceDetail> {
         children: <Widget>[
           Container(
             alignment: Alignment.topLeft,
-            child: Text("Location & Contact",
-                style: TextStyle(
-                    fontFamily: GoloFont,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w500,
-                    color: GoloColors.secondary1)),
+            child: Text(
+              "Location & Contact",
+              style: TextStyle(
+                fontFamily: GoloFont,
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                color: GoloColors.secondary1,
+              ),
+            ),
           ),
           PlaceDetailContact(
             place: place,

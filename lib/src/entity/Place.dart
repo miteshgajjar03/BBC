@@ -81,7 +81,8 @@ class Place extends Base {
   Place(Map<String, dynamic> json) : super(json) {
     status = json["status"];
     type = json["type"];
-    featuredMediaUrl = "${Lara.baseUrlImage}${json["thumb"] ?? ""}";
+    final thumb = json['thumb'] ?? '';
+    featuredMediaUrl = "${Lara.baseUrlImage}$thumb";
     gallery = json["gallery"] != null ? json["gallery"].cast<String>() : [];
     menuOrder = json["menu_order"];
     author = json["author"];
@@ -212,9 +213,9 @@ class Place extends Base {
   }
 
   //
-  // ADD TO WISH LIST
+  // ADD/REMOVE TO WISH LIST
   //
-  addRemoveToWishList({@required Function(String) message}) async {
+  addToWishList({@required Function(String) message}) async {
     Map<String, dynamic> dict = {};
     dict['place_id'] = this.id.toString();
     final api = Platform().shared.baseUrl + "app/users/wishlist";
@@ -228,5 +229,26 @@ class Place extends Base {
       messageString = error.toString();
     }
     message(messageString);
+  }
+
+  removeFromWishList({@required Function(String, bool) onRemove}) async {
+    Map<String, dynamic> dict = {};
+    dict['place_id'] = this.id.toString();
+    final api = Platform().shared.baseUrl + "app/users/wishlist";
+    final response = await Api.requestDelete(api, dict);
+
+    String messageString = '';
+    bool isSuccess = true;
+    try {
+      final res = json.decode(response.json) as Map<String, dynamic>;
+      messageString = res['message'] as String ?? '';
+    } catch (error) {
+      messageString = error.toString();
+      isSuccess = false;
+    }
+    return onRemove(
+      messageString,
+      isSuccess,
+    );
   }
 }

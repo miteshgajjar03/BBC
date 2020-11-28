@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
-import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/entity/PlaceInitialData.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 
@@ -12,12 +11,14 @@ enum SelectionType { category, placeType, country, city }
 class SelectionData {
   int id = 0;
   String name = '';
+  String sectionName = '';
   bool isSelected = false;
 
   SelectionData({
     this.id,
     this.name,
     this.isSelected,
+    this.sectionName,
   });
 }
 
@@ -65,7 +66,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
   Future _getData() async {
     switch (widget.selectionType) {
       case SelectionType.category:
-        AppState().categories.forEach((element) {
+        widget.objInitialData.categories.forEach((element) {
           arrSelection.add(
             SelectionData(
               id: element.id,
@@ -76,6 +77,36 @@ class _SelectionScreenState extends State<SelectionScreen> {
         });
         break;
       case SelectionType.placeType:
+        final arrCategory = widget.objInitialData.categories
+            .where((element) => element.isSelected)
+            .toList();
+
+        arrCategory.forEach(
+          (element) {
+            if (element.placeTypes.length > 0) {
+              arrSelection.add(
+                SelectionData(
+                  id: element.id,
+                  name: element.name,
+                  isSelected: false,
+                  sectionName: element.name,
+                ),
+              );
+              element.placeTypes.forEach(
+                (place) {
+                  arrSelection.add(
+                    SelectionData(
+                      id: place.id,
+                      name: place.name,
+                      isSelected: place.isSelected,
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        );
+
         break;
       case SelectionType.country:
         fillData() {
@@ -156,7 +187,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
                             itemCount: arrSelection.length,
                             itemBuilder: (lbCtx, index) {
                               final selection = arrSelection[index];
-                              return _buildAmenitiesRow(
+                              return _buildRow(
                                 selection: selection,
                                 onPressed: () {
                                   _setSelected(selectionData: selection);
@@ -223,9 +254,8 @@ class _SelectionScreenState extends State<SelectionScreen> {
   }) {
     switch (widget.selectionType) {
       case SelectionType.category:
-        selectionData.isSelected = !selectionData.isSelected;
-        break;
       case SelectionType.placeType:
+        selectionData.isSelected = !selectionData.isSelected;
         break;
       case SelectionType.city:
       case SelectionType.country:
@@ -243,36 +273,60 @@ class _SelectionScreenState extends State<SelectionScreen> {
   //
   // BUILD AMENITIES
   //
-  Widget _buildAmenitiesRow({
+  Widget _buildRow({
     @required SelectionData selection,
     @required Function onPressed,
   }) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(
-              selection.isSelected
-                  ? Icons.check_box
-                  : Icons.check_box_outline_blank,
+    return (selection.sectionName != null)
+        ? _buildSectionRow(
+            selection.sectionName,
+          )
+        : GestureDetector(
+            onTap: onPressed,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    selection.isSelected
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank,
+                  ),
+                  onPressed: onPressed,
+                ),
+                const SizedBox(
+                  width: 8.0,
+                ),
+                Expanded(
+                  child: Text(
+                    selection.name,
+                    style: TextStyle(
+                      fontFamily: GoloFont,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            onPressed: onPressed,
-          ),
-          const SizedBox(
-            width: 8.0,
-          ),
-          Expanded(
-            child: Text(
-              selection.name,
-              style: TextStyle(
-                fontFamily: GoloFont,
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
+          );
+  }
+
+  //
+  // BULD SECTION ROW
+  //
+  Widget _buildSectionRow(
+    String name,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      color: Colors.grey[200],
+      child: Text(
+        name,
+        style: TextStyle(
+          fontFamily: GoloFont,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

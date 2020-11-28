@@ -24,7 +24,7 @@ class PlaceDetailBloc implements Bloc {
     _place = place;
   }
 
-  int get place_id {
+  int get placeId {
     return _place.id;
   }
 

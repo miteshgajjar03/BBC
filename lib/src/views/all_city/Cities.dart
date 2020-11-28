@@ -68,9 +68,13 @@ class _CitiesState extends State<Cities> {
           ),
           height: 200, //350,
           child: GestureDetector(
-            child: CityCell(city: widget.cities[imageIndex]),
+            child: CityCell(
+              city: widget.cities[imageIndex],
+            ),
             onTap: () {
-              HomeNav(context: context).openCity(widget.cities[imageIndex]);
+              HomeNav(context: context).openCity(
+                widget.cities[imageIndex],
+              );
             },
           ),
         ),

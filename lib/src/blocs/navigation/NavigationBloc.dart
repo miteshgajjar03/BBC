@@ -4,6 +4,7 @@ import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/entity/Review.dart';
 import 'package:getgolo/src/views/citydetail/CityDetail.dart';
 import 'package:getgolo/src/views/myPlaces/add_place_screen.dart';
+import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 import 'package:getgolo/src/views/place_detail/PlaceDetail.dart';
 import 'package:getgolo/src/views/profile/profile_screen.dart';
 import 'package:getgolo/src/views/review_rating/add_review_screen.dart';
@@ -43,6 +44,20 @@ class HomeNav {
         //         animation.drive(Tween(begin: Offset(1, 0), end: Offset.zero)),
         //   );
         // },
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
+  void openMyPlace() {
+    Navigator.of(_context, rootNavigator: false).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (BuildContext context, _, __) {
+          return MyPlacesScreen(
+            listType: PlaceListType.myPlace,
+          );
+        },
         fullscreenDialog: true,
       ),
     );

@@ -25,21 +25,34 @@ class _CityCellState extends State<CityCell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: new BorderRadius.all(
+            Radius.circular(15),
+          ),
+        ),
         child: Stack(
           children: <Widget>[
             MyImage.from(
               widget.city.featuredImage,
-              borderRadius: new BorderRadius.all(Radius.circular(15)),
+              borderRadius: new BorderRadius.all(
+                Radius.circular(15),
+              ),
             ),
             Container(
               height: 350.0,
               decoration: BoxDecoration(
-                borderRadius: new BorderRadius.all(Radius.circular(15)),
+                borderRadius: new BorderRadius.all(
+                  Radius.circular(15),
+                ),
                 color: Colors.white,
                 gradient: LinearGradient(
                   begin: FractionalOffset.topCenter,
                   end: FractionalOffset.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withAlpha(200)],
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withAlpha(200),
+                  ],
                   stops: [0.4, 1.0],
                 ),
               ),
@@ -56,7 +69,7 @@ class _CityCellState extends State<CityCell> {
                       style: TextStyle(
                         fontFamily: GoloFont,
                         fontSize: 14,
-                        color: Colors.white,
+                        color: Colors.black,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

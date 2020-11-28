@@ -29,5 +29,4 @@ class AppState {
   // currentCity = null;
   // places.clear();
   // }
-
 }

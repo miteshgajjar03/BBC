@@ -3,17 +3,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/services/platform/Platform.dart';
+import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/entity/Amenity.dart';
+import 'package:getgolo/src/entity/Category.dart';
 
 class PlaceInitialData {
   List<Country> arrCountries = [];
   List<City> arrCity = [];
   List<Amenity> arrAmenity = [];
+  List<Category> categories = [];
 
   Future<bool> getInitialAPIData() async {
     try {
       await Future.wait([
         //_getCountryCityList(),
+        _fetchCategoryPlaceType(),
         _getAmenities(),
       ]);
       return true;
@@ -42,6 +46,31 @@ class PlaceInitialData {
       return true;
     } catch (error) {
       print('ERROR WHILE GETTING COUNTRY LIST :: ${error.toString()}');
+      return false;
+    }
+  }
+
+  //
+  // GET CATEGORY-PLACE
+  //
+  // Category + PlaceType
+  Future<bool> _fetchCategoryPlaceType() async {
+    var url = Platform().shared.baseUrl + "app/places/placeTypes";
+    final response = await Api.requestGetPaging(url, null);
+    try {
+      var jsonObj = json.decode(response.json) as Map;
+      var jsonData = jsonObj["data"] as Map<String, dynamic>;
+      var arrData = jsonData["data"] as List<dynamic>;
+      categories = List<Category>.generate(
+        arrData.length,
+        (index) => Category.fromJson(
+          arrData[index],
+        ),
+      );
+      return true;
+    } catch (error) {
+      print(
+          'ERROR WHILE GETTING CATEGORY-PLACE_TYPE LIST :: ${error.toString()}');
       return false;
     }
   }

@@ -112,7 +112,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     @required BuildContext buildContext,
   }) async {
     hideKeyboard(buildContext);
-    final progress = ProgressDialog(buildContext);
+    final progress = ProgressDialog(
+      buildContext,
+      isDismissible: false,
+    );
     await progress.show();
     final response = await ApiAuth.updateProfile(
       dict: {
@@ -162,7 +165,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ctx,
       );
     } else {
-      final progress = ProgressDialog(ctx);
+      final progress = ProgressDialog(
+        ctx,
+        isDismissible: false,
+      );
       await progress.show();
       final response = await ApiAuth.changePassword(
         dict: {

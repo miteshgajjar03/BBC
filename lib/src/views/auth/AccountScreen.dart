@@ -3,6 +3,7 @@ import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
+import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 import '../../../main.dart';
@@ -194,7 +195,16 @@ class AccountScreenState extends State<AccountScreen> {
                                   color: GoloColors.primary,
                                   shape: StadiumBorder(),
                                   onPressed: () {
-                                    HomeNav(context: context).openAddPlace();
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (ctx) {
+                                          return MyPlacesScreen(
+                                            listType: PlaceListType.myPlace,
+                                          );
+                                        },
+                                      ),
+                                    );
+                                    //HomeNav(context: context).openMyPlace();
                                   },
                                   child: Text(
                                     "My Place",
@@ -210,31 +220,31 @@ class AccountScreenState extends State<AccountScreen> {
                           SizedBox(
                             height: 30,
                           ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Padding(
-                              padding: EdgeInsets.only(),
-                              child: ButtonTheme(
-                                height: 50.0,
-                                child: RaisedButton(
-                                  textColor: Colors.white,
-                                  color: GoloColors.primary,
-                                  shape: StadiumBorder(),
-                                  onPressed: () {},
-                                  child: Text(
-                                    "WishList",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 30,
-                          ),
+                          // SizedBox(
+                          //   width: double.infinity,
+                          //   child: Padding(
+                          //     padding: EdgeInsets.only(),
+                          //     child: ButtonTheme(
+                          //       height: 50.0,
+                          //       child: RaisedButton(
+                          //         textColor: Colors.white,
+                          //         color: GoloColors.primary,
+                          //         shape: StadiumBorder(),
+                          //         onPressed: () {},
+                          //         child: Text(
+                          //           "WishList",
+                          //           style: TextStyle(
+                          //             fontSize: 18,
+                          //             fontWeight: FontWeight.bold,
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //   height: 30,
+                          // ),
                           SizedBox(
                             width: double.infinity,
                             child: Padding(
