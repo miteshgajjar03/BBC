@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 final googleApiKey =
     'AIzaSyCY8y_pWZbccq0ecZQHwJKs40Y5X1kfY8I'; //'AIzaSyAoUCsCGYIEP8aFtfETPDbPZOywkLZxbHo';
@@ -269,4 +270,19 @@ Widget getCenterInfoWidget({
       ),
     ),
   );
+}
+
+//
+// GET PROGRESS INDICAOR
+//
+ProgressDialog getProgressIndicator(
+    {@required BuildContext context, String loadingMessage}) {
+  final progress = ProgressDialog(
+    context,
+    isDismissible: false,
+  );
+  progress.style(
+    message: loadingMessage,
+  );
+  return progress;
 }

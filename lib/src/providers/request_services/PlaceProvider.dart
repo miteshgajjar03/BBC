@@ -77,4 +77,36 @@ class PlaceProvider {
       },
     );
   }
+
+  static Future<List<Place>> getPlaceByCategoryID({
+    @required List<int> categoryIDs,
+  }) async {
+    if (categoryIDs == null) {
+      return [];
+    }
+    final api = Platform().shared.baseUrl + "app/search-listing";
+    Map<String, dynamic> dict = {
+      'category': categoryIDs,
+    };
+
+    return Api.requestPost(api, null, dict).then(
+      (response) {
+        final res = json.decode(response.json) as Map<String, dynamic>;
+        final dictData = res['data'] as Map<String, dynamic>;
+        List<dynamic> items = dictData['data'];
+
+        try {
+          if (items != null && items.length > 0) {
+            return List<Place>.generate(
+              items.length,
+              (i) => Place(items[i]),
+            );
+          }
+        } catch (error) {
+          print('ERROR WHILE FETCHING PLACE :: ${error.toString()}');
+        }
+        return null;
+      },
+    );
+  }
 }

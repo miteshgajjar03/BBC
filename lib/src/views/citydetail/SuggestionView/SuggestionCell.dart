@@ -117,7 +117,7 @@ class _SuggestionCell extends State<SuggestionCell> {
                                         ? widget.place.doubleRate
                                                 .toStringAsFixed(1) ??
                                             ''
-                                        : 'No Rating',
+                                        : '(0 Reviews)',
                                     style: TextStyle(
                                       fontFamily: GoloFont,
                                       color: GoloColors.primary,
@@ -196,9 +196,12 @@ class _SuggestionCell extends State<SuggestionCell> {
                   if (widget.onBookmarkPressed != null) {
                     widget.onBookmarkPressed(widget.place.id);
                   } else {
-                    widget.place.addToWishList(message: (message) {
-                      showSnackBar(message, context);
-                    });
+                    widget.place.addToWishList(
+                      context: context,
+                      onAdded: (message) {
+                        showSnackBar(message, context);
+                      },
+                    );
                   }
                 },
                 child: Icon(

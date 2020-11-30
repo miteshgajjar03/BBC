@@ -105,10 +105,8 @@ class AccountScreenState extends State<AccountScreen> {
       cancelButtonTitle: 'No',
       cancelAction: () {},
       confirmAction: () async {
-        final progress = ProgressDialog(
-          context,
-          isDismissible: false,
-          type: ProgressDialogType.Normal,
+        final progress = getProgressIndicator(
+          context: context,
         );
         await progress.show();
         final _ = await ApiAuth.logout();

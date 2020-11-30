@@ -4,19 +4,21 @@ import 'package:getgolo/localization/Localized.dart';
 import 'package:getgolo/localization/LocalizedKey.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
+import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/providers/request_services/PlaceProvider.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 import 'package:getgolo/src/views/citydetail/SuggestionView/SuggestionCell.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 
-enum PlaceListType { wishList, myPlace }
+enum PlaceListType { wishList, myPlace, placeByCategory }
 
 class MyPlacesScreen extends StatefulWidget {
   final PlaceListType listType;
+  final Category category;
 
   MyPlacesScreen({
     @required this.listType,
+    this.category,
   });
 
   @override
@@ -40,9 +42,33 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
   }
 
   String get emptyListMessage {
-    return (widget.listType == PlaceListType.wishList)
-        ? 'You have not added any place in your wishlist'
-        : 'You have not added any place yet';
+    switch (widget.listType) {
+      case PlaceListType.wishList:
+        return 'You have not added any place in your wishlist';
+        break;
+      case PlaceListType.myPlace:
+        return 'You have not added any place yet';
+        break;
+      case PlaceListType.placeByCategory:
+        return 'No place found for selected category!';
+        break;
+    }
+    return '';
+  }
+
+  String get title {
+    switch (widget.listType) {
+      case PlaceListType.wishList:
+        return LocalizedKey.myWishlist;
+        break;
+      case PlaceListType.myPlace:
+        return LocalizedKey.myPlaces;
+        break;
+      case PlaceListType.placeByCategory:
+        return (widget.category != null) ? widget.category.name : 'Place';
+        break;
+    }
+    return '';
   }
 
   String get noDataFoundMessage {
@@ -55,10 +81,17 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
   // GET PLACE LIST
   //
   Future<List<Place>> _getPlaces() async {
-    final places = await PlaceProvider.getPlace(
-      listType: widget.listType,
-    );
-    return places;
+    if (widget.listType == PlaceListType.placeByCategory) {
+      final places = await PlaceProvider.getPlaceByCategoryID(
+        categoryIDs: [widget.category.id],
+      );
+      return places;
+    } else {
+      final places = await PlaceProvider.getPlace(
+        listType: widget.listType,
+      );
+      return places;
+    }
   }
 
   Future _refresh() async {
@@ -71,18 +104,15 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(
-        showBackButton: widget.listType == PlaceListType.myPlace,
+        showBackButton: (widget.listType != PlaceListType.wishList),
         backOnPressed: () {
-          if (widget.listType == PlaceListType.myPlace) {
+          if (widget.listType != PlaceListType.wishList) {
             Navigator.of(context).pop();
           }
         },
-        title: Localized.of(context).trans(
-              (widget.listType == PlaceListType.myPlace)
-                  ? LocalizedKey.myPlaces
-                  : LocalizedKey.myWishlist,
-            ) ??
-            '',
+        title: (widget.category != null)
+            ? title
+            : Localized.of(context).trans(title) ?? '',
       ),
       floatingActionButton: (widget.listType == PlaceListType.myPlace)
           ? FloatingActionButton(
@@ -100,7 +130,6 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
         child: FutureBuilder(
           future: _future,
           builder: (fbContext, AsyncSnapshot<List<Place>> snapshot) {
-            print('snapshot.hasData ${snapshot.hasData}');
             if (snapshot.connectionState == ConnectionState.waiting) {
               return getCenterInfoWidget(
                 message: fetchListTitle,
@@ -122,7 +151,7 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
                           margin: EdgeInsets.only(
                             bottom: 5,
                           ),
-                          child: _buildWishlistGridView(
+                          child: _buildGridView(
                             places: snapshot.data,
                             context: fbContext,
                           ),
@@ -162,10 +191,7 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
       actionButtonTitle: 'Yes',
       cancelButtonTitle: 'No',
       confirmAction: () async {
-        final progress = ProgressDialog(
-          ctx,
-          isDismissible: false,
-        );
+        final progress = getProgressIndicator(context: ctx);
         progress.show();
         place.removeFromWishList(
           onRemove: (message, isSuccess) async {
@@ -180,7 +206,7 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
   }
 
 // ### City list
-  Widget _buildWishlistGridView({
+  Widget _buildGridView({
     @required BuildContext context,
     @required List<Place> places,
   }) =>
@@ -191,29 +217,38 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
           places.length,
           (index) {
             final place = places[index];
-            return _buildWishListCell(
+            return _buildListCell(
               place: place,
               onBookmarkPressed: (placeId) {
-                _removeFromWishList(
-                  ctx: context,
-                  place: place,
-                  onDelete: (isSuccess) {
-                    if (isSuccess) {
-                      setState(() {
-                        places.removeWhere(
-                          (element) => element.id == placeId,
-                        );
-                      });
-                    }
-                  },
-                );
+                if (widget.listType == PlaceListType.wishList) {
+                  _removeFromWishList(
+                    ctx: context,
+                    place: place,
+                    onDelete: (isSuccess) {
+                      if (isSuccess) {
+                        setState(() {
+                          places.removeWhere(
+                            (element) => element.id == placeId,
+                          );
+                        });
+                      }
+                    },
+                  );
+                } else {
+                  place.addToWishList(
+                    context: context,
+                    onAdded: (msg) {
+                      showSnackBar(msg, context);
+                    },
+                  );
+                }
               },
             );
           },
         ),
       );
 
-  Widget _buildWishListCell({
+  Widget _buildListCell({
     @required Place place,
     @required Function(int) onBookmarkPressed,
   }) =>

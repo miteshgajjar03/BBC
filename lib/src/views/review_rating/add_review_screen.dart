@@ -42,9 +42,8 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
         ctx,
       );
     } else {
-      final progress = ProgressDialog(
-        ctx,
-        isDismissible: false,
+      final progress = getProgressIndicator(
+        context: ctx,
       );
       await progress.show();
 

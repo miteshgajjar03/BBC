@@ -13,6 +13,7 @@ AppBar buildAppBar({
     elevation: 0,
     title: Text(
       title,
+      overflow: TextOverflow.fade,
       style: TextStyle(
         fontFamily: GoloFont,
         fontWeight: FontWeight.w500,

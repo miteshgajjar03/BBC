@@ -57,10 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _getProfile({
     @required BuildContext context,
   }) async {
-    // final progress = ProgressDialog(context, isDismissible: true);
-    // await progress.show();
     final user = await ApiAuth.getProfile();
-    // await progress.hide();
     if (user != null) {
       objUser = user;
       _setupUserData();
@@ -112,9 +109,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     @required BuildContext buildContext,
   }) async {
     hideKeyboard(buildContext);
-    final progress = ProgressDialog(
-      buildContext,
-      isDismissible: false,
+    final progress = getProgressIndicator(
+      context: buildContext,
     );
     await progress.show();
     final response = await ApiAuth.updateProfile(
@@ -165,9 +161,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ctx,
       );
     } else {
-      final progress = ProgressDialog(
-        ctx,
-        isDismissible: false,
+      final progress = getProgressIndicator(
+        context: ctx,
       );
       await progress.show();
       final response = await ApiAuth.changePassword(

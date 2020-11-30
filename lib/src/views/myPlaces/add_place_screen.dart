@@ -251,9 +251,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       requestDict['opening_hour'] = opening;
       requestDict['video'] = _videoURLController.text.trim();
 
-      final progress = ProgressDialog(
-        ctx,
-        isDismissible: false,
+      final progress = getProgressIndicator(
+        context: ctx,
       );
 
       final arrPickedImages =

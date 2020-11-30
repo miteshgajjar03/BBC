@@ -18,6 +18,7 @@ import 'package:getgolo/src/views/home/controls/CategoryCell.dart';
 import 'package:getgolo/src/views/home/controls/CityCell.dart';
 import 'package:getgolo/src/views/home/search/HomeSearch.dart';
 import 'package:getgolo/modules/setting/setting.dart';
+import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
@@ -269,8 +270,10 @@ class _HomeState extends State<Home> {
       padding: const EdgeInsets.only(left: 25),
       scrollDirection: Axis.horizontal,
       itemCount: widget.categories != null ? widget.categories.length : 0,
-      itemBuilder: (BuildContext context, int index) =>
-          _buildCategoryCell(context, index),
+      itemBuilder: (BuildContext context, int index) => _buildCategoryCell(
+        context,
+        index,
+      ),
     );
   }
 
@@ -288,7 +291,10 @@ class _HomeState extends State<Home> {
               category: category,
             ),
             onTap: () {
-              //HomeNav(context).openCity(city);
+              HomeNav(context: context).openMyPlace(
+                placeListType: PlaceListType.placeByCategory,
+                category: category,
+              );
             },
           ),
         ),

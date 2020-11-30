@@ -309,7 +309,8 @@ class _PlaceDetailState extends State<PlaceDetail> {
                 ),
                 onPressed: () {
                   widget.place.addToWishList(
-                    message: (message) {
+                    context: context,
+                    onAdded: (message) {
                       showSnackBar(message, context);
                     },
                   );

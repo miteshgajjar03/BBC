@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/entity/Review.dart';
@@ -49,13 +50,17 @@ class HomeNav {
     );
   }
 
-  void openMyPlace() {
+  void openMyPlace({
+    @required PlaceListType placeListType,
+    Category category,
+  }) {
     Navigator.of(_context, rootNavigator: false).push(
       PageRouteBuilder(
         opaque: true,
         pageBuilder: (BuildContext context, _, __) {
           return MyPlacesScreen(
-            listType: PlaceListType.myPlace,
+            listType: placeListType,
+            category: category,
           );
         },
         fullscreenDialog: true,

@@ -95,8 +95,7 @@ class _PlaceDetailContactState extends State<PlaceDetailContact> {
                           margin: EdgeInsets.only(left: 20),
                           child: SelectableText(
                             widget.place != null
-                                ? (widget.place.email + widget.place.email ??
-                                    "-")
+                                ? (widget.place.email ?? "-")
                                 : "",
                             style: TextStyle(
                               fontFamily: GoloFont,

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/services/platform/Platform.dart';
-import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/entity/Amenity.dart';
 import 'package:getgolo/src/entity/Category.dart';
 

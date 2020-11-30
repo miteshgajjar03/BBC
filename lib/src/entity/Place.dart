@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/services/platform/Platform.dart';
 import 'package:getgolo/src/entity/City.dart';
@@ -215,20 +216,32 @@ class Place extends Base {
   //
   // ADD/REMOVE TO WISH LIST
   //
-  addToWishList({@required Function(String) message}) async {
+  addToWishList({
+    @required BuildContext context,
+    @required Function(String) onAdded,
+  }) async {
+    final progress = getProgressIndicator(
+      context: context,
+    );
+    await progress.show();
     Map<String, dynamic> dict = {};
     dict['place_id'] = this.id.toString();
     final api = Platform().shared.baseUrl + "app/users/wishlist";
     final response = await Api.requestPost(api, null, dict);
 
+    await progress.hide();
     String messageString = '';
     try {
       final res = json.decode(response.json) as Map<String, dynamic>;
-      messageString = res['message'] as String ?? '';
+      if (res['responseCode'] as int == 200) {
+        messageString = 'Place added to wishlist successfully!';
+      } else {
+        messageString = res['message'] as String ?? '';
+      }
     } catch (error) {
       messageString = error.toString();
     }
-    message(messageString);
+    onAdded(messageString);
   }
 
   removeFromWishList({@required Function(String, bool) onRemove}) async {
