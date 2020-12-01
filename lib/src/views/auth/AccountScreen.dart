@@ -4,7 +4,6 @@ import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
 import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 
 import '../../../main.dart';
 

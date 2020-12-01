@@ -10,7 +10,6 @@ import 'package:getgolo/modules/services/platform/Platform.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 
 class AddReviewScreen extends StatefulWidget {
   final int placeID;

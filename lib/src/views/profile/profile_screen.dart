@@ -9,7 +9,6 @@ import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/entity/User.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override

@@ -18,7 +18,6 @@ import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 import 'package:getgolo/src/views/myPlaces/selection_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:getgolo/modules/services/platform/Platform.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 
 class OpeningHour {
   String title;

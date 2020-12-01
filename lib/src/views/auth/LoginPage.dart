@@ -24,7 +24,6 @@ TextEditingController _registerConfirmPasswordController =
 
 class _LogInPageState extends StateMVC<LogInPage> {
   _LogInPageState() : super(Controller());
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -190,9 +189,10 @@ class _LogInPageState extends StateMVC<LogInPage> {
     @required String password,
     @required BuildContext buildContext,
   }) async {
-    setState(() {
-      _isLoading = true;
-    });
+    final progress = getProgressIndicator(
+      context: buildContext,
+    );
+    await progress.show();
     Map<String, String> param = {
       "email": email,
       "password": password,
@@ -200,9 +200,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
     final response = await ApiAuth.loginUsing(
       query: param,
     );
-    setState(() {
-      _isLoading = false;
-    });
+    await progress.hide();
     if (response.isSuccess) {
       final BottomNavigationBar bottomBar = globalKey.currentWidget;
       bottomBar.onTap(3);
@@ -281,9 +279,10 @@ class _LogInPageState extends StateMVC<LogInPage> {
     String name,
     BuildContext buildContext,
   }) async {
-    setState(() {
-      _isLoading = true;
-    });
+    final progress = getProgressIndicator(
+      context: buildContext,
+    );
+    await progress.show();
     Map<String, String> param = {
       "name": name,
       "email": email,
@@ -293,9 +292,7 @@ class _LogInPageState extends StateMVC<LogInPage> {
     final response = await ApiAuth.registerUsing(
       query: param,
     );
-    setState(() {
-      _isLoading = false;
-    });
+    await progress.hide();
     if (response.isSuccess) {
       _showSnackBar(response.message, context);
       Future.delayed(Duration(seconds: 2)).then(
@@ -407,25 +404,22 @@ class _LogInPageState extends StateMVC<LogInPage> {
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator(strokeWidth: 3))
-                : ButtonTheme(
-                    height: 50.0,
-                    child: RaisedButton(
-                      textColor: Colors.white,
-                      color: GoloColors.primary,
-                      shape: StadiumBorder(),
-                      onPressed: () {
-                        hideKeyboard(context);
-                        _validateLoginInput(context);
-                      },
-                      child: Text(
-                        "Sign In",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
+            child: ButtonTheme(
+              height: 50.0,
+              child: RaisedButton(
+                textColor: Colors.white,
+                color: GoloColors.primary,
+                shape: StadiumBorder(),
+                onPressed: () {
+                  hideKeyboard(context);
+                  _validateLoginInput(context);
+                },
+                child: Text(
+                  "Sign In",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
           ),
         ),
         SizedBox(
@@ -573,25 +567,22 @@ class _LogInPageState extends StateMVC<LogInPage> {
         Container(
           child: Padding(
             padding: EdgeInsets.only(),
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator(strokeWidth: 3))
-                : ButtonTheme(
-                    height: 50.0,
-                    child: RaisedButton(
-                      textColor: Colors.white,
-                      color: GoloColors.primary,
-                      shape: StadiumBorder(),
-                      onPressed: () {
-                        hideKeyboard(context);
-                        _validateRegisterInput(context);
-                      },
-                      child: Text(
-                        "Sign Up",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
+            child: ButtonTheme(
+              height: 50.0,
+              child: RaisedButton(
+                textColor: Colors.white,
+                color: GoloColors.primary,
+                shape: StadiumBorder(),
+                onPressed: () {
+                  hideKeyboard(context);
+                  _validateRegisterInput(context);
+                },
+                child: Text(
+                  "Sign Up",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
           ),
         ),
         SizedBox(
