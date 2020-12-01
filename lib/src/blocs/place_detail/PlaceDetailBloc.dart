@@ -74,6 +74,10 @@ class PlaceDetailBloc implements Bloc {
       if (!_placeController.isClosed) {
         _placeController.sink.add(_place);
       }
+    } else {
+      print('ADD ERROR :: ${response.json['message']}');
+      _placeController.sink.addError(response.json['message']);
+      return;
     }
   }
 

@@ -85,11 +85,14 @@ class ApiAuth {
 
     try {
       final res = json.decode(response.json) as Map<String, dynamic>;
-      if (res['responseCode'] is int) {
+      await _clearAuthToken();
+      return AuthResponseHandler(
+        isSuccess: (true),
+        message: res['message'] as String,
+      );
+      /*if (res['responseCode'] is int) {
         final responseCode = res['responseCode'] as int;
-        if (responseCode == 53) {
-          _clearAuthToken();
-        }
+        if (responseCode == 53) {}
         return AuthResponseHandler(
           isSuccess: (responseCode == 53),
           message: res['message'] as String,
@@ -98,8 +101,9 @@ class ApiAuth {
       return AuthResponseHandler(
         isSuccess: false,
         message: res['message'] as String,
-      );
+      );*/
     } catch (error) {
+      await _clearAuthToken();
       return AuthResponseHandler(
         isSuccess: false,
         message: error.toString(),

@@ -32,5 +32,3 @@ class CupertinoStoreApp extends StatelessWidget {
     );
   }
 }
-
-final globalKey = new GlobalKey(debugLabel: 'btm_app_bar');

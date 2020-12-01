@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:getgolo/GeneralMethods/general_method.dart';
-import 'package:getgolo/main.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
 import 'package:getgolo/src/views/auth/ForgotPassword.dart';
+import 'package:getgolo/src/views/main/DashboardTabs.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 
 bool _signUpActive = false;
