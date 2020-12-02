@@ -43,11 +43,8 @@ class _SuggestionCell extends State<SuggestionCell> {
               color: GoloColors.secondary3,
             )
           else
-            FittedBox(
-              fit: BoxFit.fill,
-              child: Image.asset(
-                'assets/photos/placeholder.png',
-              ),
+            Image.asset(
+              'assets/photos/placeholder.png',
             ),
           Container(
             decoration: BoxDecoration(

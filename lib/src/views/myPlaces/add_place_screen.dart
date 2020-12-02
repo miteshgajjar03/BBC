@@ -15,6 +15,7 @@ import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/PlaceInitialData.dart';
 import 'package:getgolo/src/entity/PlaceType.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
+import 'package:getgolo/src/views/myPlaces/place_picker.dart';
 import 'package:getgolo/src/views/myPlaces/selection_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:getgolo/modules/services/platform/Platform.dart';
@@ -74,6 +75,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   City _selectedCity;
   List<Category> _selectedCategory = [];
   List<PlaceType> _selectedPlaceType = [];
+  PlacePickerResponse _selectedAddress = PlacePickerResponse();
 
   // Text Editing Controllers
   TextEditingController _placeNameController = TextEditingController();
@@ -190,7 +192,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       showSnackBar('Please select country', ctx);
     } else if (_selectedCity == null || _selectedCity.id == 0) {
       showSnackBar('Please select city', ctx);
-    } else if (_addressController.text.trim().length == 0) {
+    } else if (_addressController.text.length == 0) {
       showSnackBar('Please enter your place address', ctx);
     } else if (_emailController.text.trim().length > 0 &&
         !isValidEmail(_emailController.text)) {
@@ -219,8 +221,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           .toList();
       requestDict['amenities'] = selectedAmenityIDs;
 
-      requestDict['lat'] = _selectedCity.latitude;
-      requestDict['lng'] = _selectedCity.longitude;
+      requestDict['lat'] = _selectedAddress.latitude;
+      requestDict['lng'] = _selectedAddress.longitude;
 
       requestDict['email'] = _emailController.text;
       requestDict['phone_number'] = _phoneController.text;
@@ -1081,11 +1083,30 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               },
             ),
             _buildTextField(
+              isReadOnly: true,
               controller: _addressController,
               labelText: 'Full Address',
               hintText: 'Address',
               validator: (text) {},
               onSaved: (text) {},
+              onTap: () {
+                PlacePicker.showPlacePicker(
+                  context: _scaffoldKey.currentContext,
+                  onError: (error) {
+                    showSnackBar(
+                      error.toString(),
+                      _scaffoldKey.currentContext,
+                    );
+                  },
+                  response: (res) {
+                    _selectedAddress = res;
+                    _addressController.text = res.address;
+                    print('${res.latitude}');
+                    print('${res.longitude}');
+                    print('${res.address}');
+                  },
+                );
+              },
             ),
           ],
         ),
