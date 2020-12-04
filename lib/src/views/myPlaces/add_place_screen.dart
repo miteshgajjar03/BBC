@@ -9,7 +9,6 @@ import 'package:getgolo/localization/LocalizedKey.dart';
 import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
-import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/entity/Amenity.dart';
 import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/PlaceInitialData.dart';
@@ -202,8 +201,10 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       requestDict['name'] = _placeNameController.text;
       requestDict['slug'] = _placeNameController.text;
       requestDict['description'] = _descriptionController.text;
-      requestDict['category'] = _selectedCategory.map((e) => e.id).toList();
-      requestDict['place_type'] = _selectedPlaceType.map((e) => e.id).toList();
+      requestDict['category'] =
+          _selectedCategory.map((e) => e.id.toString()).toList();
+      requestDict['place_type'] =
+          _selectedPlaceType.map((e) => e.id.toString()).toList();
 
       requestDict['country_id'] = _selectedCountry.id;
       requestDict['city_id'] = _selectedCity.id;
@@ -217,7 +218,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
 
       final selectedAmenityIDs = objInitialData.arrAmenity
           .where((amenity) => amenity.isSelected)
-          .map((e) => e.id)
+          .map((e) => e.id.toString())
           .toList();
       requestDict['amenities'] = selectedAmenityIDs;
 
@@ -279,8 +280,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             showSnackBar(message, ctx);
             Future.delayed(Duration(seconds: 2)).then(
               (value) {
-                _resetCategorySelection();
-                //Navigator.of(ctx).pop();
+                Navigator.of(ctx).pop();
               },
             );
           }
@@ -294,20 +294,22 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       }
       if (_thumbImage != null) {
         print('REQUEST DICT WITH THUMB :: $requestDict');
+        final thumbUploadAPI = Platform().shared.baseUrl + "app/upload-thumb";
         final res = await Api.requestPostUploadImage(
-          api,
+          thumbUploadAPI,
           _thumbImage,
           'thumb',
-          requestDict,
+          null,
         );
-        parseResponse(response: res);
+        print('THUMB UPLOADED URL :: ${res.error.toString()}');
+        //parseResponse(response: res);
       } else {
         print('REQUEST DICT WITHOUT THUMB:: $requestDict');
         requestDict['thumb'] = '';
         final res = await Api.requestPost(
           api,
           null,
-          requestDict,
+          null,
         );
         parseResponse(response: res);
       }
@@ -387,15 +389,6 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     );
   }
 
-  //
-  // RESET CATEGORY SELECTION
-  //
-  _resetCategorySelection() {
-    AppState().categories.forEach((element) {
-      element.isSelected = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -404,7 +397,6 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         title: Localized.of(context).trans(LocalizedKey.addPlace) ?? "",
         showBackButton: true,
         backOnPressed: () {
-          _resetCategorySelection();
           Navigator.of(context).pop();
         },
       ),

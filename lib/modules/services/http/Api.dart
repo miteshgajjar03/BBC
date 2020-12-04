@@ -142,13 +142,6 @@ class Api {
     MultipartRequest request = MultipartRequest("POST", postUri);
     request.headers.addAll(_getHeader());
 
-    // Map<String, String> map = {};
-    // query.forEach((key, value) {
-    //   map[key] = '$value';
-    // });
-    // print('MAP :: $map');
-    // request.fields.addAll(map);
-
     if (imageFile != null) {
       MultipartFile multipartFile = await MultipartFile.fromPath(
         imageFieldName,
