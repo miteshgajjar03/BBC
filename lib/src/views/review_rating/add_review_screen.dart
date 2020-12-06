@@ -111,7 +111,7 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
                   const SizedBox(
                     width: 16,
                   ),
-                  RatingBar(
+                  RatingBar.builder(
                     glow: false,
                     unratedColor: Colors.grey[400],
                     onRatingUpdate: (rating) {

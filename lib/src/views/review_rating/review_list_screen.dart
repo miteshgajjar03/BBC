@@ -102,7 +102,7 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
                           ),
                         ),
                       ),
-                      RatingBar(
+                      RatingBar.builder(
                         glow: false,
                         unratedColor: Colors.grey[400],
                         ignoreGestures: true,

@@ -149,7 +149,7 @@ class Api {
     // print('MAP :: $map');
     // request.fields.addAll(map);
 
-    print('FILE NAME :: ${imageFile.path.split('/').last.split('-').last}');
+    // print('FILE NAME :: ${imageFile.path.split('/').last.split('-').last}');
     if (imageFile != null) {
       MultipartFile multipartFile = await MultipartFile.fromPath(
         imageFieldName,
