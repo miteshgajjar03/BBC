@@ -17,6 +17,7 @@ import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/entity/PlaceCategory.dart';
 import 'package:getgolo/src/providers/BlocProvider.dart';
 import 'package:getgolo/src/views/citydetail/SuggestionView/SuggestionGrid.dart';
+import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 import 'package:getgolo/src/views/place_detail_overview/PlaceDetailOverview.dart';
 import 'SuggestionView/SuggestionList.dart';
 import 'map/CityGoogleMapView.dart';
@@ -443,7 +444,7 @@ class _CityDetailState extends State<CityDetail> {
   // ### ACTIONS
   void _openPlace(Place place) {
     if (place != null) {
-      HomeNav(context: context).openPlace(place);
+      HomeNav(context: context).openPlace(place,PlaceListType.placeByCategory);
     }
   }
 

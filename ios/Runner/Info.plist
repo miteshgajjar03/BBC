@@ -46,4 +46,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Allow camera to capture photo.</string>
 </dict>
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSAllowsArbitraryLoads</key>
+  <true/>
+</dict>
 </plist>

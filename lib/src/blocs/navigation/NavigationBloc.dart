@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/entity/Place.dart';
+import 'package:getgolo/src/entity/PlaceType.dart';
 import 'package:getgolo/src/entity/Review.dart';
 import 'package:getgolo/src/views/citydetail/CityDetail.dart';
 import 'package:getgolo/src/views/myPlaces/add_place_screen.dart';
@@ -69,7 +70,7 @@ class HomeNav {
   }
 
   /// ### Place
-  void openPlace(Place place) {
+  void openPlace(Place place,PlaceListType type) {
     if (place == null) {
       return;
     }
@@ -79,11 +80,11 @@ class HomeNav {
     // Comment list
     //place.setComments(comments);
     // Open place
-    _openPlace(place);
+    _openPlace(place,type);
     //});
   }
 
-  void _openPlace(Place place) {
+  void _openPlace(Place place,PlaceListType type) {
     if (place == null) {
       return;
     }
@@ -94,7 +95,7 @@ class HomeNav {
         // transitionDuration: const Duration(milliseconds: 222),
         pageBuilder: (BuildContext context, _, __) {
           return PlaceDetail(
-            place: place,
+            place: place,type: type,
           );
         },
         // transitionsBuilder: (_, Animation<double> animation, __, Widget child) {
@@ -122,23 +123,23 @@ class HomeNav {
     );
   }
 
-  void openReviewList({
-    @required List<Review> review,
-    @required int placeID,
-  }) {
-    Navigator.of(_context, rootNavigator: true).push(
-      PageRouteBuilder(
-        opaque: true,
-        pageBuilder: (BuildContext context, _, __) {
-          return ReviewListScreen(
-            reviews: review,
-            placeID: placeID,
-          );
-        },
-        fullscreenDialog: true,
-      ),
-    );
-  }
+  // void openReviewList({
+  //   @required List<Review> review,
+  //   @required int placeID,
+  // }) {
+  //   Navigator.of(_context, rootNavigator: true).push(
+  //     PageRouteBuilder(
+  //       opaque: true,
+  //       pageBuilder: (BuildContext context, _, __) {
+  //         return ReviewListScreen(
+  //           reviews: review,
+  //           placeID: placeID,
+  //         );
+  //       },
+  //       fullscreenDialog: true,
+  //     ),
+  //   );
+  // }
 
   void openWriteReview({
     @required int placeID,

@@ -16,7 +16,7 @@ class PlaceInitialData {
     try {
       await Future.wait([
         //_getCountryCityList(),
-        _fetchCategoryPlaceType(),
+        fetchCategoryPlaceType(),
         _getAmenities(),
       ]);
       return true;
@@ -53,7 +53,7 @@ class PlaceInitialData {
   // GET CATEGORY-PLACE
   //
   // Category + PlaceType
-  Future<bool> _fetchCategoryPlaceType() async {
+  Future<bool> fetchCategoryPlaceType() async {
     var url = Platform().shared.baseUrl + "app/places/placeTypes";
     final response = await Api.requestGetPaging(url, null);
     try {

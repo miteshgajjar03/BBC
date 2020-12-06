@@ -78,6 +78,7 @@ class Place extends Base {
 
   //City
   City city;
+  String video;
 
   Place(Map<String, dynamic> json) : super(json) {
     status = json["status"];
@@ -106,12 +107,13 @@ class Place extends Base {
     cityId = json["city_id"];
     lat = json["lat"];
     lng = json["lng"];
+    video=json["video"];
     address = json["address"];
     // Price range
     var value = json["price_range"];
     if (value == null || value == "None") {
       priceRange = "";
-    } else if (value == "Free") {
+    } else if (value == "Free" || value == 0) {
       priceRange = "Free";
     } else {
       var count = value;

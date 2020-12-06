@@ -86,7 +86,7 @@ class _GoogleMapView extends State<GoogleMapViewPlace> {
                               size: 15, color: GoloColors.secondary2),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(right: 20, left: 10),
+                          padding: EdgeInsets.only(right: 10, left: 10),
                           child: Text(
                             "Back",
                             style: TextStyle(
@@ -165,7 +165,7 @@ class _GoogleMapView extends State<GoogleMapViewPlace> {
         imageString = 'assets/iconGolo/icon-shop@3x.png';
         break;
       default:
-        imageString = '';
+        imageString = 'assets/iconGolo/icon-see@3x.png';
     }
 
     if (imageString != null &&

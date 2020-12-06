@@ -1,64 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/localization/Localized.dart';
 import 'package:getgolo/localization/LocalizedKey.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
+import 'package:getgolo/src/blocs/place_detail/PlaceDetailBloc.dart';
+import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/entity/Review.dart';
+import 'package:getgolo/src/providers/BlocProvider.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 
+import 'add_review_screen.dart';
+
 class ReviewListScreen extends StatefulWidget {
-  final List<Review> reviews;
+  // final List<Review> reviews;
   final int placeID;
+  final Place place;
+
   _ReviewListScreenState createState() => _ReviewListScreenState();
 
-  ReviewListScreen({
-    @required this.reviews,
-    @required this.placeID,
-  });
+  ReviewListScreen({@required this.placeID, @required this.place});
 }
 
 class _ReviewListScreenState extends State<ReviewListScreen> {
+  void openWriteReview({@required int placeID, BuildContext context}) {
+    Navigator.of(context, rootNavigator: true)
+        .push(
+          PageRouteBuilder(
+            opaque: true,
+            pageBuilder: (BuildContext context, _, __) {
+              return AddReviewScreen(
+                placeID: placeID,
+              );
+            },
+            fullscreenDialog: true,
+          ),
+        )
+        .then((value) => setState(() {
+              bloc = PlaceDetailBloc(widget.place);
+              bloc.fetchData(widget.placeID);
+            }));
+  }
+
+  //Bloc
+  PlaceDetailBloc bloc;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // Get list amenity for place
+    bloc = PlaceDetailBloc(widget.place);
+    bloc.fetchData(widget.placeID);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: buildAppBar(
-        title: Localized.of(context).trans(LocalizedKey.reviews) ?? "",
-        showBackButton: true,
-        backOnPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: GoloColors.primary,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          HomeNav(context: context).openWriteReview(
-            placeID: widget.placeID,
-          );
-        },
-        child: Icon(Icons.add),
-      ),
-      body: (widget.reviews != null && widget.reviews.length > 0)
-          ? ListView.builder(
-              itemCount: widget.reviews.length,
-              itemBuilder: (lbContext, index) {
-                final review = widget.reviews[index];
-                return _buildReviewRow(review: review);
-              },
-            )
-          : Center(
-              child: Text(
-                'No Reviews',
-                style: TextStyle(
-                  fontFamily: GoloFont,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
-    );
+    return BlocProvider<PlaceDetailBloc>(
+        bloc: bloc,
+        child: Scaffold(
+          appBar: buildAppBar(
+            title: Localized.of(context).trans(LocalizedKey.reviews) ?? "",
+            showBackButton: true,
+            backOnPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: GoloColors.primary,
+            foregroundColor: Colors.white,
+            onPressed: () {
+              openWriteReview(placeID: widget.placeID, context: context);
+              // HomeNav(context: context).openWriteReview(
+              //   placeID: widget.placeID,
+              // );
+            },
+            child: Icon(Icons.add),
+          ),
+          body: StreamBuilder<Place>(
+              stream: bloc.placeController,
+              builder: (context, AsyncSnapshot<Place> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return getCenterInfoWidget(
+                    message: 'Fetching reviews',
+                  );
+                } else if (snapshot.hasError) {
+                  return _buildCenterWidgetForShowError(
+                    ctx: context,
+                    message: snapshot.error.toString(),
+                  );
+                } else if (snapshot.hasData) {
+                  var place = snapshot.data;
+                  return (bloc.reviews != null && bloc.reviews.length > 0)
+                      ? ListView.builder(
+                          itemCount: bloc.reviews.length,
+                          itemBuilder: (lbContext, index) {
+                            final review = bloc.reviews[index];
+                            return _buildReviewRow(review: review);
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                            'No Reviews',
+                            style: TextStyle(
+                              fontFamily: GoloFont,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        );
+                } else {
+                  return _buildCenterWidgetForShowError(
+                    ctx: context,
+                    message:
+                        'Error while fetching place details!\nPlease try again later!',
+                  );
+                }
+              }),
+        ));
   }
 
   Widget _buildReviewRow({
@@ -132,6 +193,31 @@ class _ReviewListScreenState extends State<ReviewListScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  //
+  // BUILD CENTER WIDGET FOR ERROR
+  //
+  Widget _buildCenterWidgetForShowError({
+    @required BuildContext ctx,
+    @required String message,
+  }) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          getCenterInfoWidget(
+            message: message,
+          ),
+          RaisedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Back'),
+          ),
+        ],
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/views/citydetail/map/MyMapStyle.dart';
+import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class GoogleMapViewCity extends StatefulWidget {
@@ -256,7 +257,7 @@ class _GoogleMapView extends State<GoogleMapViewCity> {
 //  }
 
   void _handlePressedInfowindow(Place place) {
-    HomeNav(context: context).openPlace(place);
+    HomeNav(context: context).openPlace(place,PlaceListType.placeByCategory);
   }
 
   Widget _showPopOverPlace() {

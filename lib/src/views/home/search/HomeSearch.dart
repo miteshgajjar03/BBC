@@ -7,6 +7,7 @@ import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/providers/request_services/Api+search.dart';
 import 'package:getgolo/src/views/home/search/SearchResultCell.dart';
+import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 
 class HomeSearchPage extends StatefulWidget {
   // Callback events
@@ -170,7 +171,7 @@ class _HomeSearchPageState extends State<HomeSearchPage> {
   }
 
   void _handlePressedPlace(Place place) {
-    HomeNav(context: context).openPlace(place);
+    HomeNav(context: context).openPlace(place,PlaceListType.placeByCategory);
   }
 
   // Get cities media

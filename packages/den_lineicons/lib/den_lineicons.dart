@@ -35,4 +35,6 @@ class DenLineIcons {
   static const IconData filter = const IconDataMaker(0xf0b0);
   static const IconData cancel = const IconDataMaker(0xf00d);
   static const IconData heart = const IconDataMaker(0xf004);
+  static const IconData gallery = const IconDataMaker(0xf302);
+  static const IconData video = const IconDataMaker(0xf03d);
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:getgolo/src/blocs/Bloc.dart';
+import 'package:getgolo/src/entity/City.dart';
 import 'package:getgolo/src/entity/PlaceCategory.dart';
 import 'package:getgolo/src/entity/PlaceType.dart';
 import 'package:getgolo/src/entity/Review.dart';
@@ -15,6 +16,7 @@ class PlaceDetailBloc implements Bloc {
   List<Place> similarPlaces = [];
   List<PlaceCategory> categories = [];
   List<PlaceType> placeTypes = [];
+  City city;
   Place _place;
   // Stream
   final _placeController = StreamController<Place>.broadcast();
@@ -53,7 +55,12 @@ class PlaceDetailBloc implements Bloc {
         for (var json in response.json["data"]["reviews"]) {
           reviews.add(Review.fromJson(json));
         }
+        reviews=reviews.reversed.toList();
         _place.reviewCount = reviews.length;
+      }
+      //City
+      if (response.json["data"]["city"] != null) {
+        city = City.fromJson(response.json["data"]["city"]);
       }
       // similarPlaces
       if (response.json["data"]["similar_places"].length > 0) {

@@ -88,6 +88,7 @@ class Api {
     Map<String, String> headerDict = {};
     if (UserManager.shared.authToken.isNotEmpty) {
       headerDict['Authorization'] = UserManager.shared.authToken;
+      print("Token"+UserManager.shared.authToken);
     }
     headerDict['Content-Type'] = 'application/json';
     return headerDict;

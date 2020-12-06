@@ -4,12 +4,16 @@ import 'package:getgolo/modules/controls/images/MyImageHelper.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/entity/Place.dart';
+import 'package:getgolo/src/views/myPlaces/add_place_screen.dart';
+import 'package:getgolo/src/views/place_detail/PlaceGallery.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PlaceDetailHeader extends StatefulWidget {
   final String category;
+  final String City;
   final Place place;
 
-  PlaceDetailHeader({Key key, this.place, this.category}) : super(key: key);
+  PlaceDetailHeader({Key key, this.place, this.category,this.City}) : super(key: key);
 
   @override
   _PlaceDetailHeaderState createState() {
@@ -51,10 +55,10 @@ class _PlaceDetailHeaderState extends State<PlaceDetailHeader> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   Text(
-                    widget.category ?? "",
+                    widget.City ?? "",
                     style: TextStyle(
                       fontFamily: GoloFont,
-                      fontSize: 12,
+                      fontSize: 15,
                       color: Colors.white,
                     ),
                   ),
@@ -144,7 +148,7 @@ class _PlaceDetailHeaderState extends State<PlaceDetailHeader> {
                         ),
                       ),
                       Text(
-                        widget.place != null ? widget.place.category.first : "",
+                        widget.place != null ? widget.category : "",
                         style: TextStyle(
                           fontFamily: GoloFont,
                           fontSize: 15,
@@ -152,6 +156,106 @@ class _PlaceDetailHeaderState extends State<PlaceDetailHeader> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Visibility(
+                        child: new GestureDetector(
+                          onTap: () {
+                            Navigator.of(context, rootNavigator: true).push(
+                              PageRouteBuilder(
+                                opaque: true,
+                                pageBuilder: (BuildContext context, _, __) {
+                                  return PlaceGallery(
+                                    gallery: widget.place.gallery,
+                                  );
+                                },
+                                fullscreenDialog: true,
+                              ),
+                            );
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                DenLineIcons.gallery,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 10),
+                                padding: EdgeInsets.all(0),
+                                child: Text(
+                                  "Gallery",
+                                  style: TextStyle(
+                                    fontFamily: GoloFont,
+                                    fontSize: 17,
+                                    color: Colors.white,
+                                  ),
+                                  //overflow: TextOverflow.ellipsis,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        visible: widget.place.gallery != null &&
+                                widget.place.gallery.length > 0
+                            ? true
+                            : false,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Visibility(
+                        child: new GestureDetector(
+                          onTap: () async{
+                            if (await canLaunch(widget.place.video)) {
+                            await launch(widget.place.video, forceSafariVC: false);
+                            } else {
+                            throw 'Could not launch $widget.place.video';
+                            }
+                            // Navigator.of(context, rootNavigator: true).push(
+                            //   PageRouteBuilder(
+                            //     opaque: true,
+                            //     pageBuilder: (BuildContext context, _, __) {
+                            //       return PlaceVideo(
+                            //         videoUrl: widget.place.video,
+                            //       );
+                            //     },
+                            //     fullscreenDialog: true,
+                            //   ),
+                            // );
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                DenLineIcons.video,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 10),
+                                padding: EdgeInsets.all(0),
+                                child: Text(
+                                  "Video",
+                                  style: TextStyle(
+                                    fontFamily: GoloFont,
+                                    fontSize: 17,
+                                    color: Colors.white,
+                                  ),
+                                  //overflow: TextOverflow.ellipsis,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        visible: widget.place.video != null ? true : false,
+                      )
                     ],
                   )
                 ],

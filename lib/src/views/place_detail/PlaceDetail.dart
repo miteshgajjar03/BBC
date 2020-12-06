@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/blocs/place_detail/PlaceDetailBloc.dart';
+import 'package:getgolo/src/entity/Review.dart';
 import 'package:getgolo/src/providers/BlocProvider.dart';
 import 'package:den_lineicons/den_lineicons.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,17 +13,20 @@ import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:getgolo/src/entity/Place.dart';
 import 'package:getgolo/src/views/citydetail/map/PlaceGoogleMapView.dart';
+import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
 import 'package:getgolo/src/views/place_detail/controls/Contact.dart';
 import 'package:getgolo/src/views/place_detail/controls/Header.dart';
 import 'package:getgolo/src/views/place_detail_overview/PlaceDetailOverview.dart';
+import 'package:getgolo/src/views/review_rating/review_list_screen.dart';
 
 import 'controls/Facilities.dart';
 import 'controls/OpenTime.dart';
 
 class PlaceDetail extends StatefulWidget {
   final Place place;
+  final PlaceListType type;
 
-  PlaceDetail({Key key, this.place}) : super(key: key);
+  PlaceDetail({Key key, this.place,this.type}) : super(key: key);
 
   @override
   _PlaceDetailState createState() {
@@ -33,6 +37,7 @@ class PlaceDetail extends StatefulWidget {
 class _PlaceDetailState extends State<PlaceDetail> {
   ScrollController _scrollController;
   Color _headerBackgroundColor = GoloColors.clear;
+
   Color _titleColor = GoloColors.clear;
   // Show full opening time
   bool showFullOpeningTime = false;
@@ -53,10 +58,65 @@ class _PlaceDetailState extends State<PlaceDetail> {
         setState(() {});
       });
     // Get list amenity for place
+
     bloc = PlaceDetailBloc(widget.place);
     bloc.fetchData(widget.place.id);
   }
 
+  void openReviewList({
+    @required List<Review> review,
+    @required int placeID, BuildContext context
+  }) {
+    Navigator.of(context, rootNavigator: true).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (BuildContext context, _, __) {
+          return ReviewListScreen(
+            place: widget.place,
+            placeID: placeID,
+          );
+        },
+        fullscreenDialog: true,
+      ),
+    ).then((value) => getPlaceDetail());
+  }
+
+  void getPlaceDetail()
+  {
+    // Get list amenity for place
+    setState(() {
+      bloc = PlaceDetailBloc(widget.place);
+      bloc.fetchData(widget.place.id);
+    });
+  }
+
+  String getPlaceTypeString()
+  {
+    String placeString="";
+    for (var placetype in bloc.placeTypes) {
+      if(placeString.isEmpty) {
+        placeString = placeString + placetype.name;
+      }else
+        {
+          placeString = placeString +" , "+ placetype.name;
+        }
+    }
+    return placeString;
+  }
+
+  String getPlaceCategoryString()
+  {
+    String categoryString="";
+    for (var category in bloc.categories) {
+      if(categoryString.isEmpty) {
+        categoryString = categoryString + category.name;
+      }else
+      {
+        categoryString = categoryString +" , "+ category.name;
+      }
+    }
+    return categoryString;
+  }
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PlaceDetailBloc>(
@@ -94,7 +154,10 @@ class _PlaceDetailState extends State<PlaceDetail> {
                                   child: PlaceDetailHeader(
                                     place: place,
                                     category: bloc.categories.length > 0
-                                        ? bloc.categories.first.name
+                                        ? bloc.categories[0].name
+                                        : "",
+                                    City:  bloc.city!=null
+                                        ? bloc.city.name
                                         : "",
                                   ),
                                 ),
@@ -118,6 +181,10 @@ class _PlaceDetailState extends State<PlaceDetail> {
                                 ),
                                 // Overview
                                 _buildOverview(place),
+                                //Place Category
+                                _buildCategories(),
+                                //Place Type
+                                _buildPlaceType(),
                                 // MAP VIEW
                                 _buildMapview(place),
                                 // Location & contacts
@@ -188,10 +255,12 @@ class _PlaceDetailState extends State<PlaceDetail> {
                                   top: false,
                                   child: GestureDetector(
                                     onTap: () {
-                                      HomeNav(context: context).openReviewList(
-                                        review: bloc.reviews,
-                                        placeID: bloc.placeId,
-                                      );
+                                     openReviewList( review: bloc.reviews,
+                                       placeID: bloc.placeId,context: context);
+                                      // HomeNav(context: context).openReviewList(
+                                      //   review: bloc.reviews,
+                                      //   placeID: bloc.placeId,
+                                      // );
                                     },
                                     child: Container(
                                       height: 64.0,
@@ -345,21 +414,25 @@ class _PlaceDetailState extends State<PlaceDetail> {
                   ),
                 ),
               ),
-              CupertinoButton(
-                child: Icon(
-                  DenLineIcons.bookmark,
-                  size: 24,
-                  color: Colors.white,
+              Visibility(
+                child: CupertinoButton(
+                  child: Icon(
+                    DenLineIcons.bookmark,
+                    size: 24,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    widget.place.addToWishList(
+                      context: context,
+                      onAdded: (message) {
+                        showSnackBar(message, context);
+                      },
+                    );
+                  },
                 ),
-                onPressed: () {
-                  widget.place.addToWishList(
-                    context: context,
-                    onAdded: (message) {
-                      showSnackBar(message, context);
-                    },
-                  );
-                },
+                visible: widget.type==PlaceListType.wishList ? false : true,
               )
+
             ],
           ),
         ),
@@ -459,6 +532,77 @@ class _PlaceDetailState extends State<PlaceDetail> {
       ),
     );
   }
+
+  Widget _buildCategories() {
+    if (bloc.categories == null) {
+      return Container();
+    }
+    return Container(
+      margin: EdgeInsets.only(left: 25, right: 25, top: 10, bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "Place Category",
+            style: TextStyle(
+                fontFamily: GoloFont,
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                color: GoloColors.secondary1),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 10, bottom: 0),
+            child: Text(
+              getPlaceCategoryString(),
+              style: TextStyle(
+                  fontFamily: GoloFont,
+                  fontSize: 15,
+                  color: GoloColors.secondary2),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlaceType() {
+    if (bloc.placeTypes == null) {
+      return Container();
+    }
+    return Container(
+      margin: EdgeInsets.only(left: 25, right: 25, top: 10, bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "Place Types",
+            style: TextStyle(
+                fontFamily: GoloFont,
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                color: GoloColors.secondary1),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 10, bottom: 0),
+            child: Text(
+              getPlaceTypeString(),
+              style: TextStyle(
+                  fontFamily: GoloFont,
+                  fontSize: 15,
+                  color: GoloColors.secondary2),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildMapview(Place place) {
     if (place.lat == null && place.lng == null) {

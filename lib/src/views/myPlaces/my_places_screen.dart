@@ -156,7 +156,7 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
                             bottom: 5,
                           ),
                           child: _buildGridView(
-                            places: snapshot.data,
+                            places: snapshot.data.reversed.toList(),
                             context: fbContext,
                           ),
                         ),
@@ -291,7 +291,7 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
             ),
             onTap: () {
               HomeNav(context: context).openPlace(
-                place,
+                place,widget.listType
               );
             },
           ),

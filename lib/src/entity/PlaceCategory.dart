@@ -15,7 +15,7 @@ class PlaceCategory extends Base {
 
   PlaceCategory(Map<String, dynamic> json) : super(json) {
     id = json["category_id"];
-    name = parse(json["category_name"] ?? "").documentElement.text;
+    name = parse(json["name"] ?? "").documentElement.text;
     priority = json["priority"];
     isFeature = json["is_feature"];
     featureTitle = json["feature_title"];
