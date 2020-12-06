@@ -6,6 +6,7 @@ import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/Place.dart';
+import 'package:getgolo/src/entity/User.dart';
 import 'package:getgolo/src/providers/request_services/PlaceProvider.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
 import 'package:getgolo/src/views/citydetail/SuggestionView/SuggestionCell.dart';
@@ -73,7 +74,7 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
 
   String get noDataFoundMessage {
     return (widget.listType == PlaceListType.wishList)
-        ? 'No wishlist found'
+        ? 'No wishlist found!\nTry pull to refresh to update your list!'
         : 'No place found';
   }
 
@@ -87,10 +88,13 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
       );
       return places;
     } else {
-      final places = await PlaceProvider.getPlace(
-        listType: widget.listType,
-      );
-      return places;
+      if (UserManager.shared.authToken.isNotEmpty) {
+        final places = await PlaceProvider.getPlace(
+          listType: widget.listType,
+        );
+        return places;
+      }
+      return null;
     }
   }
 
@@ -161,16 +165,40 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
                   ),
                 );
               } else {
-                return getCenterInfoWidget(
+                return _showCenterWidgetWithPullToRefresh(
                   message: emptyListMessage,
                 );
               }
             } else {
-              return getCenterInfoWidget(
-                message: noDataFoundMessage,
+              String message = noDataFoundMessage;
+              if (widget.listType == PlaceListType.wishList &&
+                  UserManager.shared.authToken.isEmpty) {
+                message = 'Please login to your account to get your wishlist!';
+              }
+              return _showCenterWidgetWithPullToRefresh(
+                message: message,
               );
             }
           },
+        ),
+      ),
+    );
+  }
+
+  //
+  // SHOW CNETER TEXT WITH PULL TO REFRESH ENABLE
+  //
+  Widget _showCenterWidgetWithPullToRefresh({@required String message}) {
+    return SingleChildScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height -
+              AppBar().preferredSize.height -
+              MediaQuery.of(context).padding.top,
+        ),
+        child: getCenterInfoWidget(
+          message: message,
         ),
       ),
     );

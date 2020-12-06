@@ -33,6 +33,7 @@ dependencies:
   flutter_rating_bar: ^3.2.0+1
   progress_dialog: ^1.2.4
   image_picker: ^0.6.7+14
+  flutter_google_places: ^0.2.6
 
 
 dev_dependencies:

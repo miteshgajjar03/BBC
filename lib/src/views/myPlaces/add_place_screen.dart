@@ -9,12 +9,12 @@ import 'package:getgolo/localization/LocalizedKey.dart';
 import 'package:getgolo/modules/services/http/Api.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
-import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/entity/Amenity.dart';
 import 'package:getgolo/src/entity/Category.dart';
 import 'package:getgolo/src/entity/PlaceInitialData.dart';
 import 'package:getgolo/src/entity/PlaceType.dart';
 import 'package:getgolo/src/views/app_bar/bbc_app_bar.dart';
+import 'package:getgolo/src/views/myPlaces/place_picker.dart';
 import 'package:getgolo/src/views/myPlaces/selection_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:getgolo/modules/services/platform/Platform.dart';
@@ -74,6 +74,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   City _selectedCity;
   List<Category> _selectedCategory = [];
   List<PlaceType> _selectedPlaceType = [];
+  PlacePickerResponse _selectedAddress = PlacePickerResponse();
 
   // Text Editing Controllers
   TextEditingController _placeNameController = TextEditingController();
@@ -190,7 +191,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       showSnackBar('Please select country', ctx);
     } else if (_selectedCity == null || _selectedCity.id == 0) {
       showSnackBar('Please select city', ctx);
-    } else if (_addressController.text.trim().length == 0) {
+    } else if (_addressController.text.length == 0) {
       showSnackBar('Please enter your place address', ctx);
     } else if (_emailController.text.trim().length > 0 &&
         !isValidEmail(_emailController.text)) {
@@ -200,8 +201,10 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       requestDict['name'] = _placeNameController.text;
       requestDict['slug'] = _placeNameController.text;
       requestDict['description'] = _descriptionController.text;
-      requestDict['category'] = _selectedCategory.map((e) => e.id).toList();
-      requestDict['place_type'] = _selectedPlaceType.map((e) => e.id).toList();
+      requestDict['category'] =
+          _selectedCategory.map((e) => e.id.toString()).toList();
+      requestDict['place_type'] =
+          _selectedPlaceType.map((e) => e.id.toString()).toList();
 
       requestDict['country_id'] = _selectedCountry.id;
       requestDict['city_id'] = _selectedCity.id;
@@ -215,12 +218,12 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
 
       final selectedAmenityIDs = objInitialData.arrAmenity
           .where((amenity) => amenity.isSelected)
-          .map((e) => e.id)
+          .map((e) => e.id.toString())
           .toList();
       requestDict['amenities'] = selectedAmenityIDs;
 
-      requestDict['lat'] = _selectedCity.latitude;
-      requestDict['lng'] = _selectedCity.longitude;
+      requestDict['lat'] = _selectedAddress.latitude;
+      requestDict['lng'] = _selectedAddress.longitude;
 
       requestDict['email'] = _emailController.text;
       requestDict['phone_number'] = _phoneController.text;
@@ -277,8 +280,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
             showSnackBar(message, ctx);
             Future.delayed(Duration(seconds: 2)).then(
               (value) {
-                _resetCategorySelection();
-                //Navigator.of(ctx).pop();
+                Navigator.of(ctx).pop();
               },
             );
           }
@@ -288,27 +290,20 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       }
 
       if (!progress.isShowing()) {
-        //await progress.show();
+        await progress.show();
       }
       if (_thumbImage != null) {
-        print('REQUEST DICT WITH THUMB :: $requestDict');
-        final res = await Api.requestPostUploadImage(
-          api,
-          _thumbImage,
-          'thumb',
-          requestDict,
-        );
-        parseResponse(response: res);
-      } else {
-        print('REQUEST DICT WITHOUT THUMB:: $requestDict');
-        requestDict['thumb'] = '';
-        final res = await Api.requestPost(
-          api,
-          null,
-          requestDict,
-        );
-        parseResponse(response: res);
+        final thumbURL = await _uploadThumbImage();
+        requestDict['thumb'] = thumbURL;
       }
+
+      print('REQUEST DICT :: $requestDict');
+      final res = await Api.requestPost(
+        api,
+        null,
+        requestDict,
+      );
+      parseResponse(response: res);
     }
   }
 
@@ -385,15 +380,6 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     );
   }
 
-  //
-  // RESET CATEGORY SELECTION
-  //
-  _resetCategorySelection() {
-    AppState().categories.forEach((element) {
-      element.isSelected = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -402,7 +388,6 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         title: Localized.of(context).trans(LocalizedKey.addPlace) ?? "",
         showBackButton: true,
         backOnPressed: () {
-          _resetCategorySelection();
           Navigator.of(context).pop();
         },
       ),
@@ -1081,11 +1066,30 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               },
             ),
             _buildTextField(
+              isReadOnly: true,
               controller: _addressController,
               labelText: 'Full Address',
               hintText: 'Address',
               validator: (text) {},
               onSaved: (text) {},
+              onTap: () {
+                PlacePicker.showPlacePicker(
+                  context: _scaffoldKey.currentContext,
+                  onError: (error) {
+                    showSnackBar(
+                      error.toString(),
+                      _scaffoldKey.currentContext,
+                    );
+                  },
+                  response: (res) {
+                    _selectedAddress = res;
+                    _addressController.text = res.address;
+                    print('${res.latitude}');
+                    print('${res.longitude}');
+                    print('${res.address}');
+                  },
+                );
+              },
             ),
           ],
         ),
@@ -1462,5 +1466,32 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       }
     });
     return urls;
+  }
+
+  //
+  // UploadThumbImage
+  //
+  Future<String> _uploadThumbImage() async {
+    final thumbUploadAPI = Platform().shared.baseUrl + "app/upload-thumb";
+    final response = await Api.requestPostUploadImage(
+      thumbUploadAPI,
+      _thumbImage,
+      'thumb',
+      null,
+    );
+    try {
+      final res = json.decode(response.json) as Map<String, dynamic>;
+      print('RES :: $res');
+      final resData = res['data'] as Map<String, dynamic>;
+      final uploadedURL = resData['data'] as String;
+      return uploadedURL;
+    } catch (error) {
+      print('ERROR WHILE UPLOADING GALLERY IMAGE :: ${error.toString()}');
+      return '';
+      showSnackBar(
+        error.toString(),
+        _scaffoldKey.currentContext,
+      );
+    }
   }
 }

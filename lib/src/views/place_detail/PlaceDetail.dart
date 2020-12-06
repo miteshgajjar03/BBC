@@ -65,112 +65,124 @@ class _PlaceDetailState extends State<PlaceDetail> {
         backgroundColor: Colors.white,
         body: StreamBuilder<Place>(
           stream: bloc.placeController,
-          builder: (context, snapshot) {
-            var place = snapshot.data;
-            return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: SystemUiOverlayStyle.light,
-              child: Stack(
-                children: <Widget>[
-                  Container(
-                    child: Column(
-                      children: <Widget>[
-                        Expanded(
-                          child: ListView(
-                            controller: _scrollController,
-                            padding: EdgeInsets.all(0),
-                            children: <Widget>[
-                              Container(
-                                height: 250,
-                                child: PlaceDetailHeader(
-                                  place: place,
-                                  category: bloc.categories.length > 0
-                                      ? bloc.categories.first.name
-                                      : "",
-                                ),
-                              ),
-                              Container(
-                                height: bloc.amenities.length > 0 ? 95 : 0,
-                                child: Column(
-                                  children: <Widget>[
-                                    Expanded(
-                                        child: bloc.amenities.length > 0
-                                            ? FacilitiesView(
-                                                amenities: bloc.amenities,
-                                              )
-                                            : Container()),
-                                    Container(
-                                      height: 1,
-                                      color:
-                                          GoloColors.secondary3.withAlpha(180),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              // Overview
-                              _buildOverview(place),
-                              // MAP VIEW
-                              _buildMapview(place),
-                              // Location & contacts
-                              _buildLocationAndContact(place),
-                              // OPEN TIME
-                              Visibility(
-                                child: Container(
-                                  margin: EdgeInsets.only(
-                                    top: 25,
-                                    left: 25,
-                                    right: 25,
+          builder: (context, AsyncSnapshot<Place> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return getCenterInfoWidget(
+                message: 'Fetching Place Details',
+              );
+            } else if (snapshot.hasError) {
+              return _buildCenterWidgetForShowError(
+                ctx: context,
+                message: snapshot.error.toString(),
+              );
+            } else if (snapshot.hasData) {
+              var place = snapshot.data;
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: SystemUiOverlayStyle.light,
+                child: Stack(
+                  children: <Widget>[
+                    Container(
+                      child: Column(
+                        children: <Widget>[
+                          Expanded(
+                            child: ListView(
+                              controller: _scrollController,
+                              padding: EdgeInsets.all(0),
+                              children: <Widget>[
+                                Container(
+                                  height: 250,
+                                  child: PlaceDetailHeader(
+                                    place: place,
+                                    category: bloc.categories.length > 0
+                                        ? bloc.categories.first.name
+                                        : "",
                                   ),
+                                ),
+                                Container(
+                                  height: bloc.amenities.length > 0 ? 95 : 0,
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
                                     children: <Widget>[
+                                      Expanded(
+                                          child: bloc.amenities.length > 0
+                                              ? FacilitiesView(
+                                                  amenities: bloc.amenities,
+                                                )
+                                              : Container()),
                                       Container(
-                                        alignment: Alignment.topLeft,
-                                        child: Text("Opening Time",
-                                            style: TextStyle(
-                                                fontFamily: GoloFont,
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.w500,
-                                                color: GoloColors.secondary1)),
-                                      ),
-                                      PlaceDetailOpenTime(
-                                        place: place,
-                                        showFull: showFullOpeningTime,
-                                      ),
-                                      Visibility(
-                                        child: CupertinoButton(
-                                          padding: EdgeInsets.all(0),
-                                          onPressed: () {
-                                            setState(() {
-                                              showFullOpeningTime =
-                                                  !showFullOpeningTime;
-                                            });
-                                          },
-                                          child: Text(
-                                              showFullOpeningTime
-                                                  ? "Show less"
-                                                  : "Show more",
-                                              style: TextStyle(
-                                                  fontFamily: GoloFont,
-                                                  fontSize: 16,
-                                                  color: GoloColors.primary,
-                                                  fontWeight: FontWeight.w500)),
-                                        ),
-                                        visible: (place != null
-                                                ? place.openingTime.length
-                                                : 0) >
-                                            2,
+                                        height: 1,
+                                        color: GoloColors.secondary3
+                                            .withAlpha(180),
                                       )
                                     ],
                                   ),
                                 ),
-                                visible: (place != null
-                                        ? place.openingTime.length
-                                        : 0) >
-                                    0,
-                              ),
-                              // REVIEW
-                              if (bloc.reviews.length > 0)
+                                // Overview
+                                _buildOverview(place),
+                                // MAP VIEW
+                                _buildMapview(place),
+                                // Location & contacts
+                                _buildLocationAndContact(place),
+                                // OPEN TIME
+                                Visibility(
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      top: 25,
+                                      left: 25,
+                                      right: 25,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Container(
+                                          alignment: Alignment.topLeft,
+                                          child: Text("Opening Time",
+                                              style: TextStyle(
+                                                  fontFamily: GoloFont,
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.w500,
+                                                  color:
+                                                      GoloColors.secondary1)),
+                                        ),
+                                        PlaceDetailOpenTime(
+                                          place: place,
+                                          showFull: showFullOpeningTime,
+                                        ),
+                                        Visibility(
+                                          child: CupertinoButton(
+                                            padding: EdgeInsets.all(0),
+                                            onPressed: () {
+                                              setState(() {
+                                                showFullOpeningTime =
+                                                    !showFullOpeningTime;
+                                              });
+                                            },
+                                            child: Text(
+                                                showFullOpeningTime
+                                                    ? "Show less"
+                                                    : "Show more",
+                                                style: TextStyle(
+                                                    fontFamily: GoloFont,
+                                                    fontSize: 16,
+                                                    color: GoloColors.primary,
+                                                    fontWeight:
+                                                        FontWeight.w500)),
+                                          ),
+                                          visible: (place != null
+                                                  ? place.openingTime.length
+                                                  : 0) >
+                                              2,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  visible: (place != null
+                                          ? place.openingTime.length
+                                          : 0) >
+                                      0,
+                                ),
+                                // REVIEW
+                                //if (bloc.reviews.length > 0)
                                 SafeArea(
                                   maintainBottomViewPadding: true,
                                   top: false,
@@ -210,7 +222,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
                                     ),
                                   ),
                                 ),
-                              /*Container(
+                                /*Container(
                                 margin: EdgeInsets.only(top: 25),
                                 color: GoloColors.secondary1.withAlpha(15),
                                 child: Container(
@@ -224,10 +236,10 @@ class _PlaceDetailState extends State<PlaceDetail> {
                               Container(
                                 height: 10,
                               ),*/
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        /*Container(
+                          /*Container(
                                 height: 80,
                                 alignment: Alignment.center,
                                 padding: EdgeInsets.only(bottom: 15),
@@ -255,15 +267,47 @@ class _PlaceDetailState extends State<PlaceDetail> {
                                   ),
                                 ),
                               ),*/
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  _buildHeader(place, context),
-                ],
-              ),
-            );
+                    _buildHeader(place, context),
+                  ],
+                ),
+              );
+            } else {
+              return _buildCenterWidgetForShowError(
+                ctx: context,
+                message:
+                    'Error while fetching place details!\nPlease try again later!',
+              );
+            }
           },
         ),
+      ),
+    );
+  }
+
+  //
+  // BUILD CENTER WIDGET FOR ERROR
+  //
+  Widget _buildCenterWidgetForShowError({
+    @required BuildContext ctx,
+    @required String message,
+  }) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          getCenterInfoWidget(
+            message: message,
+          ),
+          RaisedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Back'),
+          ),
+        ],
       ),
     );
   }
@@ -401,12 +445,15 @@ class _PlaceDetailState extends State<PlaceDetail> {
             onPressed: () {
               openOverview(context, place);
             },
-            child: Text("Show more",
-                style: TextStyle(
-                    fontFamily: GoloFont,
-                    fontSize: 16,
-                    color: GoloColors.primary,
-                    fontWeight: FontWeight.w500)),
+            child: Text(
+              "Show more",
+              style: TextStyle(
+                fontFamily: GoloFont,
+                fontSize: 16,
+                color: GoloColors.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           )
         ],
       ),
@@ -414,7 +461,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
   }
 
   Widget _buildMapview(Place place) {
-    if (place == null) {
+    if (place.lat == null && place.lng == null) {
       return Container();
     }
     return Container(
@@ -435,21 +482,28 @@ class _PlaceDetailState extends State<PlaceDetail> {
                   color: GoloColors.secondary1),
             ),
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                _openMap(place);
-              },
-              child: Container(
-                margin: EdgeInsets.only(top: 10),
-                child: AbsorbPointer(
-                  child: GoogleMapViewPlace(
-                    isFullScreen: false,
-                    zoom: 14,
-                    place: place,
+          GestureDetector(
+            onTap: () {
+              _openMap(place);
+            },
+            child: Container(
+              height: 180,
+              width: double.infinity,
+              margin: EdgeInsets.only(top: 10),
+              child: AbsorbPointer(
+                child: Image.network(
+                  getMapURLFrom(
+                    latitude: place.lat,
+                    longitude: place.lng,
                   ),
-                  absorbing: true,
+                  fit: BoxFit.cover,
                 ),
+                // child: GoogleMapViewPlace(
+                //   isFullScreen: false,
+                //   zoom: 14,
+                //   place: place,
+                // ),
+                absorbing: true,
               ),
             ),
           )

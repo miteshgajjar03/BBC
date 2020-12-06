@@ -34,15 +34,18 @@ class _SuggestionCell extends State<SuggestionCell> {
         alignment: Alignment.bottomCenter,
         children: <Widget>[
           //1. Image
-          MyImage.from(
-            (widget.place.featuredMediaUrl != null)
-                ? widget.place.featuredMediaUrl
-                : '',
-            borderRadius: new BorderRadius.all(
-              Radius.circular(15),
+          if (widget.place.featuredMediaUrl != null)
+            MyImage.from(
+              widget.place.featuredMediaUrl,
+              borderRadius: new BorderRadius.all(
+                Radius.circular(15),
+              ),
+              color: GoloColors.secondary3,
+            )
+          else
+            Image.asset(
+              'assets/photos/placeholder.png',
             ),
-            color: GoloColors.secondary3,
-          ),
           Container(
             decoration: BoxDecoration(
               borderRadius: new BorderRadius.all(
@@ -218,8 +221,13 @@ class _SuggestionCell extends State<SuggestionCell> {
   }
 
   String getPlaceTypes(Place place) {
-    var string =
-        place.placeTypes.map((placeType) => placeType.name).toList().join("\n");
-    return string;
+    if (place.placeTypes != null) {
+      var string = place.placeTypes
+          .map((placeType) => placeType.name)
+          .toList()
+          .join("\n");
+      return string;
+    }
+    return '';
   }
 }

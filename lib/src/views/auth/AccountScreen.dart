@@ -3,9 +3,8 @@ import 'package:getgolo/GeneralMethods/general_method.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/src/blocs/navigation/NavigationBloc.dart';
 import 'package:getgolo/src/providers/request_services/Api+auth.dart';
+import 'package:getgolo/src/views/main/DashboardTabs.dart';
 import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
-
-import '../../../main.dart';
 
 class AccountScreen extends StatefulWidget {
   //@override
@@ -113,7 +112,7 @@ class AccountScreenState extends State<AccountScreen> {
         //if (response.isSuccess) {
         Future.delayed(
           Duration(
-            milliseconds: 100,
+            milliseconds: 200,
           ),
         ).then(
           (value) {

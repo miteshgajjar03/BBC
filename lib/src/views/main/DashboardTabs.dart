@@ -1,6 +1,5 @@
 import 'package:den_lineicons/den_lineicons.dart';
 import 'package:flutter/material.dart';
-import 'package:getgolo/main.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/entity/User.dart';
@@ -9,6 +8,8 @@ import 'package:getgolo/src/views/auth/AccountScreen.dart';
 import 'package:getgolo/src/views/auth/LoginPage.dart';
 import 'package:getgolo/src/views/home/Home.dart';
 import 'package:getgolo/src/views/myPlaces/my_places_screen.dart';
+
+final globalKey = new GlobalKey(debugLabel: 'btm_app_bar');
 
 class DashboardTabs extends StatefulWidget {
   @override

@@ -167,10 +167,13 @@ class _CityDetailState extends State<CityDetail> {
                                   height: 60, child: _tableCategories(bloc)),
                               //3. Map
                               Container(
-                                height: 150,
+                                height: 180,
                                 child: Stack(
                                   children: <Widget>[
-                                    Container(child: _buildMap(bloc, false)),
+                                    Container(
+                                      child: _buildMap(bloc, false),
+                                      width: double.infinity,
+                                    ),
                                     Container(
                                       child: SizedBox.expand(
                                         child: FlatButton(
@@ -412,16 +415,29 @@ class _CityDetailState extends State<CityDetail> {
   }
 
   Widget _buildMap(CityDetailBloc bloc, bool isFullScreen) {
-    return new GoogleMapViewCity(
-      categories: selectedCategoryId == null
-          ? bloc.categories
-          : bloc.categories
-              .where((cat) => cat.id == selectedCategoryId)
-              .toList(),
-      city: widget.city,
-      isFullScreen: isFullScreen,
-      zoom: 12,
-    );
+    if (isFullScreen) {
+      return new GoogleMapViewCity(
+        categories: selectedCategoryId == null
+            ? bloc.categories
+            : bloc.categories
+                .where((cat) => cat.id == selectedCategoryId)
+                .toList(),
+        city: widget.city,
+        isFullScreen: isFullScreen,
+        zoom: 12,
+      );
+    }
+    if (widget.city.lat != null && widget.city.lng != null) {
+      return Image.network(
+        getMapURLFrom(
+          latitude: widget.city.lat,
+          longitude: widget.city.lng,
+          zoom: 12,
+        ),
+        fit: BoxFit.cover,
+      );
+    }
+    return Container();
   }
 
   // ### ACTIONS

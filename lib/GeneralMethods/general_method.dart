@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:getgolo/modules/setting/fonts.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
-final googleApiKey =
-    'AIzaSyCY8y_pWZbccq0ecZQHwJKs40Y5X1kfY8I'; //'AIzaSyAoUCsCGYIEP8aFtfETPDbPZOywkLZxbHo';
+final googleApiKey = 'AIzaSyCrGRnzKChN_9d9sENM1dnVVIwDTf8wptk';
 
 showConfirmationAlert({
   @required BuildContext context,
@@ -250,11 +249,12 @@ showImagePickerActionSheet({
 String getMapURLFrom({
   @required latitude,
   @required longitude,
+  int zoom = 15,
 }) {
   if (latitude == null || longitude == null) {
     return '';
   }
-  return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$latitude,$longitude&radius=1500&key=$googleApiKey";
+  return "http://maps.google.com/maps/api/staticmap?center=$latitude,$longitude&zoom=$zoom&size=600x400&sensor=false&markers=color:red%7Clabel:%7C$latitude,$longitude&key=$googleApiKey";
 }
 
 Widget getCenterInfoWidget({

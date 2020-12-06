@@ -82,8 +82,12 @@ class Place extends Base {
   Place(Map<String, dynamic> json) : super(json) {
     status = json["status"];
     type = json["type"];
-    final thumb = json['thumb'] ?? '';
-    featuredMediaUrl = "${Lara.baseUrlImage}$thumb";
+    String thumb = json['thumb'] ?? '';
+    if (thumb.isEmpty) {
+      featuredMediaUrl = null;
+    } else {
+      featuredMediaUrl = "${Lara.baseUrlImage}$thumb";
+    }
     gallery = json["gallery"] != null ? json["gallery"].cast<String>() : [];
     menuOrder = json["menu_order"];
     author = json["author"];
