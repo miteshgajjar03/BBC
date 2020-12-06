@@ -290,29 +290,20 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       }
 
       if (!progress.isShowing()) {
-        //await progress.show();
+        await progress.show();
       }
       if (_thumbImage != null) {
-        print('REQUEST DICT WITH THUMB :: $requestDict');
-        final thumbUploadAPI = Platform().shared.baseUrl + "app/upload-thumb";
-        final res = await Api.requestPostUploadImage(
-          thumbUploadAPI,
-          _thumbImage,
-          'thumb',
-          null,
-        );
-        print('THUMB UPLOADED URL :: ${res.error.toString()}');
-        //parseResponse(response: res);
-      } else {
-        print('REQUEST DICT WITHOUT THUMB:: $requestDict');
-        requestDict['thumb'] = '';
-        final res = await Api.requestPost(
-          api,
-          null,
-          null,
-        );
-        parseResponse(response: res);
+        final thumbURL = await _uploadThumbImage();
+        requestDict['thumb'] = thumbURL;
       }
+
+      print('REQUEST DICT :: $requestDict');
+      final res = await Api.requestPost(
+        api,
+        null,
+        requestDict,
+      );
+      parseResponse(response: res);
     }
   }
 
@@ -1475,5 +1466,32 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       }
     });
     return urls;
+  }
+
+  //
+  // UploadThumbImage
+  //
+  Future<String> _uploadThumbImage() async {
+    final thumbUploadAPI = Platform().shared.baseUrl + "app/upload-thumb";
+    final response = await Api.requestPostUploadImage(
+      thumbUploadAPI,
+      _thumbImage,
+      'thumb',
+      null,
+    );
+    try {
+      final res = json.decode(response.json) as Map<String, dynamic>;
+      print('RES :: $res');
+      final resData = res['data'] as Map<String, dynamic>;
+      final uploadedURL = resData['data'] as String;
+      return uploadedURL;
+    } catch (error) {
+      print('ERROR WHILE UPLOADING GALLERY IMAGE :: ${error.toString()}');
+      return '';
+      showSnackBar(
+        error.toString(),
+        _scaffoldKey.currentContext,
+      );
+    }
   }
 }

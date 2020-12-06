@@ -445,12 +445,15 @@ class _PlaceDetailState extends State<PlaceDetail> {
             onPressed: () {
               openOverview(context, place);
             },
-            child: Text("Show more",
-                style: TextStyle(
-                    fontFamily: GoloFont,
-                    fontSize: 16,
-                    color: GoloColors.primary,
-                    fontWeight: FontWeight.w500)),
+            child: Text(
+              "Show more",
+              style: TextStyle(
+                fontFamily: GoloFont,
+                fontSize: 16,
+                color: GoloColors.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           )
         ],
       ),
