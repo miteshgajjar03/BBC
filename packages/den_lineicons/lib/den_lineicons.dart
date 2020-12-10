@@ -14,6 +14,7 @@ class DenLineIcons {
   static const IconData city = const IconDataMaker(0xf64f);
   static const IconData bookmark = const IconDataMaker(0xf02e);
   static const IconData home = const IconDataMaker(0xf015);
+  static const IconData about = const IconDataMaker(0xf129);
   static const IconData search = const IconDataMaker(0xf002);
   static const IconData user = const IconDataMaker(0xf007);
   static const IconData angle_left = const IconDataMaker(0xf104);

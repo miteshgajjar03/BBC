@@ -45,7 +45,7 @@ dev_dependencies:
 flutter_icons:
   android: true 
   ios: true
-  image_path: "assets/app/launch/Golo_App_Icon.png"
+  image_path: "assets/app/launch/favicon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

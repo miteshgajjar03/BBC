@@ -118,17 +118,6 @@ class _MyPlacesScreenState extends State<MyPlacesScreen> {
             ? title
             : Localized.of(context).trans(title) ?? '',
       ),
-      floatingActionButton: (widget.listType == PlaceListType.myPlace)
-          ? FloatingActionButton(
-              child: Icon(
-                Icons.add,
-              ),
-              backgroundColor: GoloColors.primary,
-              onPressed: () {
-                HomeNav(context: context).openAddPlace();
-              },
-            )
-          : null,
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: FutureBuilder(

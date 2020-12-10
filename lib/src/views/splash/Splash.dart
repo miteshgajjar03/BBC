@@ -44,12 +44,12 @@ class _SplashPageState extends State<SplashPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Image(
-                      image: AssetImage('assets/app/launch/golo-logo.png'),
+                      image: AssetImage('assets/app/launch/favicon.png'),
                       fit: BoxFit.cover),
                   Column(
                     children: <Widget>[
                       Text(
-                        "Golo",
+                        "BBC APP",
                         style: TextStyle(
                             fontFamily: GoloFont,
                             fontSize: 50,
@@ -57,7 +57,7 @@ class _SplashPageState extends State<SplashPage> {
                             color: GoloColors.secondary1),
                       ),
                       Text(
-                        "Travel city guide template",
+                        "Black Business Caribbean",
                         style: TextStyle(
                             fontFamily: GoloFont,
                             fontSize: 22,
@@ -92,7 +92,14 @@ class _SplashPageState extends State<SplashPage> {
                           color: GoloColors.secondary1),
                     ),
                     Text(
-                      "2020 © uxper.co",
+                      "2020 © Black Business Caribbean",
+                      style: TextStyle(
+                          fontFamily: GoloFont,
+                          fontSize: 15,
+                          color: GoloColors.secondary2),
+                    ),
+                    Text(
+                      "Developed By Uniwebb Software",
                       style: TextStyle(
                           fontFamily: GoloFont,
                           fontSize: 15,

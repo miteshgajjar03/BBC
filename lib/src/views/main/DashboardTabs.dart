@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:getgolo/modules/setting/colors.dart';
 import 'package:getgolo/modules/state/AppState.dart';
 import 'package:getgolo/src/entity/User.dart';
+import 'package:getgolo/src/views/about/AboutUs.dart';
 import 'package:getgolo/src/views/all_city/Cities.dart';
 import 'package:getgolo/src/views/auth/AccountScreen.dart';
 import 'package:getgolo/src/views/auth/LoginPage.dart';
@@ -48,7 +49,8 @@ class _DashboardTabsState extends State<DashboardTabs> {
           _buildTabIcon(0),
           _buildTabIcon(1),
           _buildTabIcon(2),
-          _buildTabIcon(3)
+          _buildTabIcon(3),
+          _buildTabIcon(4)
         ],
       ),
     );
@@ -81,6 +83,9 @@ class _DashboardTabsState extends State<DashboardTabs> {
       case 3:
         icon = DenLineIcons.user;
         break;
+      case 4:
+        icon = DenLineIcons.about;
+        break;
       default:
         icon = DenLineIcons.home;
         break;
@@ -109,6 +114,7 @@ class _DashboardTabsState extends State<DashboardTabs> {
         listType: PlaceListType.wishList,
       ),
       UserManager.shared.authToken.isEmpty ? LogInPage() : AccountScreen(),
+      AboutUS()
     ];
     return _screens;
   }
